@@ -4,9 +4,95 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:euler_graph_generator"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        mc:Ignorable="d" 
+        Icon="Images\favicon.png"
+        Title="График Эйлера" Height="720" Width="1280" MinHeight="360" MinWidth="640">
+   
+    <!--Dostosowanie okna oraz ustawienia viewboxa oraz grida wewnatrz niego-->
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="White"/>
+            <GradientStop Color="#FFD6DAD6" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
+    <Viewbox StretchDirection="Both" Stretch="Uniform">
+        <Grid Width="1340" Height="720">
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFF2FB98" Offset="0.11"/>
+                    <GradientStop Color="#FF83B3F9" Offset="0.996"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="593*"/>
+                <RowDefinition Height="66*"/>
+                <RowDefinition Height="61*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="75*"/>
+                <ColumnDefinition Width="193*"/>
+            </Grid.ColumnDefinitions>
+
+
+            <Grid Grid.Column="1" HorizontalAlignment="Left" Height="573" Margin="10,10,0,0" VerticalAlignment="Top" Width="945">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFF3F3EC"/>
+                        <GradientStop Color="White" Offset="1"/>
+                        <GradientStop Color="White"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+            </Grid>
+
+            <Grid HorizontalAlignment="Left" Height="696" Margin="10,10,0,0" VerticalAlignment="Top" Width="355" Grid.RowSpan="3">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFB8CAFB"/>
+                        <GradientStop Color="#FFD0D5DC" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <Label Content="Liczba wierzchołków" Height="49"  Margin="59,10,60,637" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559"/>
+                <TextBox HorizontalAlignment="Left"  Height="30" Margin="203,59,0,0"  Text="{Binding F1Formula}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                <Slider x:Name="liczbaWierzcholkow" HorizontalAlignment="Left" Height="30" Margin="12,64,0,0" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B"/>
+
+                <Label Content="Prawdopodobieństwo" Height="49"  Margin="59,104,60,543" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559"/>
+                <TextBox HorizontalAlignment="Left"  Height="30" Margin="203,144,0,0"  Text="{Binding F1Formula}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.496,3.002"/>
+                <Slider x:Name="prawdopodobienstwo" HorizontalAlignment="Left" Height="30" Margin="12,149,0,0" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B"/>
+
+                <Label Content="Macierz incydencji" Height="49"  Margin="72,198,79,449" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559"/>
+
+                <Grid HorizontalAlignment="Left" Height="180" Margin="17,242,0,0" VerticalAlignment="Top" Width="316">
+                    <Grid.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#FFF3F3EC"/>
+                            <GradientStop Color="White" Offset="1"/>
+                            <GradientStop Color="White"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                </Grid>
+            </Grid>
+
+            <Grid HorizontalAlignment="Left" Height="66" VerticalAlignment="Top" Width="945" Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFBCCAF0"/>
+                        <GradientStop Color="White" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <Button x:Name="Generuj" Content="Generuj graf" HorizontalAlignment="Left" Height="46" Margin="10,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Generuj_Click" />
+                <Button x:Name="Napraw_graf" Content="Napraw graf" HorizontalAlignment="Left" Height="46" Margin="179,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Napraw_Click" />
+                <Button x:Name="Reset" Content="Resetuj" HorizontalAlignment="Left" Height="46" Margin="785,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlackButton}" Click="Reset_Click" RenderTransformOrigin="0.499,-0.043" />
+                <Button x:Name="Zapisz" Content="Zapisz do pliku" HorizontalAlignment="Left" Height="46" Margin="630,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Zapisz_Click" RenderTransformOrigin="0.499,-0.043" />
+               
+            </Grid>
+
+
+            <!--Stopka-->
+            <!--Label organizacji-->
+            <Label Content="© Vertisio 2018" Height="37" Margin="0,10,43,0" Grid.Row="2" VerticalAlignment="Top" Foreground="#FFF2EDF7" Grid.Column="1" FontWeight="Bold" FontFamily="Bernard MT Condensed" HorizontalAlignment="Right" Width="160" FontSize="24"/>
+            <!--Label autorów-->
+            <Label Content="© Łukasz Czepielik, Kamil Haręża, Konrad Korzonkiewicz, Bartosz Wróbel, Wojciech Rogowski" HorizontalAlignment="Left" Height="32" Margin="10,15,0,0" Grid.Row="2" VerticalAlignment="Top" Width="712" Foreground="White" Grid.Column="1" FontFamily="Sitka Text" FontStyle="Italic" FontSize="16"/>
+
+        </Grid>
+    </Viewbox>
 </Window>

@@ -24,5 +24,25 @@ namespace euler_graph_generator
         {
             InitializeComponent();
         }
+
+        private void Generuj_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Napraw_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Zapisz_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
