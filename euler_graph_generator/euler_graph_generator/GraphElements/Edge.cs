@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 
 namespace euler_graph_generator.GraphElements
 {
@@ -22,9 +24,13 @@ namespace euler_graph_generator.GraphElements
             }
         }
 
-        public Edge(string id, Vertex source, Vertex target)
+        public Color EdgeColor { get; set; }
+        public Visibility EdgeVisibility { get; set; }
+
+        public Edge(Visibility edgeVisibility, string id, Vertex source, Vertex target)
             : base(source, target)
         {
+            EdgeVisibility = edgeVisibility;
             ID = id;
         }
 

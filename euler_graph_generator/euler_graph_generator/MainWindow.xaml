@@ -9,8 +9,57 @@
         mc:Ignorable="d" 
         Icon="Images\favicon.png"
         Title="График Эйлера" Height="720" Width="1280" MinHeight="360" MinWidth="640">
-    
+    <Window.Resources>
+        <vm:EdgeVisibilityConverter x:Key="EdgeVisibilityConverter"/>
+        <DataTemplate x:Key="demoTemplate" DataType="{x:Type local:Vertex}">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <TextBlock Text="{Binding Path=VertexValue, Mode=OneWay}" Foreground="White" />
+            </StackPanel>
+        </DataTemplate>
 
+        <Style TargetType="{x:Type graphsharp:VertexControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type graphsharp:VertexControl}">
+                        <Border 
+                               Background="LightBlue"
+							   CornerRadius="10,10,10,10"
+							   Padding="{TemplateBinding Padding}">
+
+                            <StackPanel Orientation="Vertical">
+                                <ContentPresenter Content="{TemplateBinding Vertex}" 
+                                            ContentTemplate="{StaticResource demoTemplate}"/>
+                            </StackPanel>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="2" Color="LightGray" 
+                                    Opacity="0.3" Direction="315"/>
+                            </Border.Effect>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <Style TargetType="{x:Type graphsharp:EdgeControl}">
+            <Style.Resources>
+                <ToolTip x:Key="ToolTipContent">
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" Text="Edge Information"/>
+                        <TextBlock Text="{Binding ID}"/>
+                    </StackPanel>
+                </ToolTip>
+            </Style.Resources>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="ToolTip" Value="{StaticResource ToolTipContent}"/>
+            <Setter Property="Visibility" Value="{Binding RelativeSource={RelativeSource Self}, Path=Edge.EdgeVisibility, Converter={StaticResource EdgeVisibilityConverter}}"/>
+        </Style>
+    </Window.Resources>
     <!--Dostosowanie okna oraz ustawienia viewboxa oraz grida wewnatrz niego-->
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">

@@ -7,6 +7,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace euler_graph_generator.ViewModels
 {
@@ -57,6 +60,7 @@ namespace euler_graph_generator.ViewModels
             }
 
         }
+
 
         private double _probabilityValue;
         public double ProbabilityValue
@@ -116,9 +120,15 @@ namespace euler_graph_generator.ViewModels
         }
         #endregion
 
+        public void HideEdge(string from, string to)
+        {
+            Graph.Edges.Where(e => e.Source.VertexValue == from && e.Target.VertexValue == to).FirstOrDefault().EdgeVisibility = Visibility.Hidden;
+        }
+
         public void ReLayoutGraph()
         {
             Graph = new Graph(true);
+            _dataTable = new DataTable();
             _matrix = new double[_numberOfVertices][];
 
             //tablica(pusta) krawędzi/połączeń pomiędzy wierzchołkami
@@ -226,12 +236,13 @@ namespace euler_graph_generator.ViewModels
         private Edge AddNewGraphEdge(Vertex from, Vertex to)
         {
             string edgeString = string.Format("Połączone wierzchołki: {0}-{1}", from.VertexValue, to.VertexValue);
-
-            Edge newEdge = new Edge(edgeString, from, to);
+            Color edgeColor = (_random.Next() % 2 == 0) ? Colors.Black : Colors.Red;
+            Edge newEdge = new Edge(Visibility.Visible, edgeString, from, to);
             Graph.AddEdge(newEdge);
             return newEdge;
         }
         #endregion
+
 
         #region INotifyPropertyChanged Implementation
 
@@ -243,5 +254,18 @@ namespace euler_graph_generator.ViewModels
         }
 
         #endregion
+    }
+    public class EdgeVisibilityConverter : IValueConverter
+    {
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return (Visibility)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
