@@ -36,9 +36,7 @@
                 <ColumnDefinition Width="193*"/>
             </Grid.ColumnDefinitions>
 
-
-            <Grid Grid.Column="1" HorizontalAlignment="Left" Height="573" Margin="10,10,0,0" VerticalAlignment="Top" Width="945">
-                
+                <Grid Grid.Column="1" HorizontalAlignment="Left" Height="556" Margin="10,10,0,0" VerticalAlignment="Top" Width="945">
                 <Grid.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                         <GradientStop Color="#FFF3F3EC"/>
@@ -46,15 +44,17 @@
                         <GradientStop Color="White"/>
                     </LinearGradientBrush>
                 </Grid.Background>
-                <vm:GraphLayout x:Name="graphLayout" Margin="100"
+                <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Column="1">
+                    <vm:GraphLayout x:Name="graphLayout" Margin="100"
 						Graph="{Binding Path=Graph}"
 						LayoutAlgorithmType="{Binding Path=LayoutAlgorithmType, Mode=OneWay}"
 						OverlapRemovalAlgorithmType="FSA"
-						HighlightAlgorithmType="Simple" 
-                            />
-            </Grid>
+						HighlightAlgorithmType="Simple" />
+                </Viewbox>
+                </Grid>
+         
 
-            <Grid HorizontalAlignment="Left" Height="696" Margin="10,10,0,0" VerticalAlignment="Top" Width="355" Grid.RowSpan="3">
+    <Grid HorizontalAlignment="Left" Height="696" Margin="10,10,0,0" VerticalAlignment="Top" Width="355" Grid.RowSpan="3">
                 <Grid.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                         <GradientStop Color="#FFB8CAFB"/>
