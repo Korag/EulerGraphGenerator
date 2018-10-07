@@ -1,4 +1,5 @@
-﻿using System;
+﻿using euler_graph_generator.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,14 +21,19 @@ namespace euler_graph_generator
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainWindowViewModel vm;
         public MainWindow()
         {
+            vm = new MainWindowViewModel();
+            this.DataContext = vm;
+            this.WindowState = WindowState.Maximized;
             InitializeComponent();
         }
 
+
         private void Generuj_Click(object sender, RoutedEventArgs e)
         {
-
+            vm.ReLayoutGraph();
         }
 
         private void Napraw_Click(object sender, RoutedEventArgs e)
