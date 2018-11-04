@@ -43,12 +43,13 @@ namespace euler_graph_generator
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
 
         private void Zapisz_Click(object sender, RoutedEventArgs e)
         {
 
+            vm.RepairGraph();
         }
     }
 }

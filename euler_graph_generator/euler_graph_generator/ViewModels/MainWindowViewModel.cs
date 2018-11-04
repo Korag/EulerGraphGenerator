@@ -1,9 +1,13 @@
 ﻿using euler_graph_generator.GraphElements;
+using euler_graph_generator.GraphMethods;
 using GraphSharp.Controls;
+using QuickGraph;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +22,7 @@ namespace euler_graph_generator.ViewModels
     //              7. grafy nieskierowane 8. nagłówki do wierszy w macierzy incydencji 9. optymalizacja? xd 10. sprawozdanie :)
 
     //klasa odpowiedzialna za rysowanie -> taki canvas dla grafów
+
     public class GraphLayout : GraphLayout<Vertex, Edge, Graph>
     {
         public GraphLayout()
@@ -31,24 +36,16 @@ namespace euler_graph_generator.ViewModels
         #region Private Data
 
         private DataTable _dataTable;
-        private Random _random;
+        private Random _random = new Random();
         private double[][] _matrix;
+        private List<Vertex> _existingVertices;
         #endregion
 
         #region Properties
         public List<string> LayoutAlgorithmTypes { get; } = new List<string>();
 
-        private double ArraySingleValue = 0;
+        public DataView DataView { get; private set; }
 
-        private DataView _dataView;
-        public DataView DataView
-        {
-            get
-            {
-                return _dataView;
-            }
-        }
-       
         private int _numberOfVertices;
         public int NumberOfVertices
         {
@@ -95,6 +92,16 @@ namespace euler_graph_generator.ViewModels
                 NotifyPropertyChanged("Graph");
             }
         }
+        private UndirectedBidirectionalGraph<Vertex, Edge> _undirectedGraph;
+        public UndirectedBidirectionalGraph<Vertex, Edge> UndirectedGraph
+        {
+            get { return _undirectedGraph; }
+            set
+            {
+                _undirectedGraph = value;
+                NotifyPropertyChanged("UndirectedGraph");
+            }
+        }
         #endregion
 
         #region Ctor
@@ -125,117 +132,116 @@ namespace euler_graph_generator.ViewModels
             Graph.Edges.Where(e => e.Source.VertexValue == from && e.Target.VertexValue == to).FirstOrDefault().EdgeVisibility = Visibility.Hidden;
         }
 
-        public void ReLayoutGraph()
+        public void RepairGraph()
         {
-            Graph = new Graph(true);
-            _dataTable = new DataTable();
-            _matrix = new double[_numberOfVertices][];
-
-            //tablica(pusta) krawędzi/połączeń pomiędzy wierzchołkami
+            double[] tempTab = new double[_numberOfVertices];
+            List<double> tempList = new List<double>();
+            List<Vertex> tempVertexList = new List<Vertex>();
+            int k = 0;
             for (int i = 0; i < _numberOfVertices; i++)
             {
-                _matrix[i] = new double[_numberOfVertices];
+                if (_matrix[i][_numberOfVertices] == 0)
+                {
+                    AddNewGraphEdge(_existingVertices[i], _existingVertices[_random.Next(0, _numberOfVertices-1)]);
+                }
+
+            }
+            for (int i = 0; i < _numberOfVertices; i++)
+            {
+                tempTab[i] = _matrix[i][_numberOfVertices];
             }
 
+            for (int i = 0; i < _numberOfVertices; i++)
+            {
+                if (tempTab[i]%2!=0)
+                {
+                    tempVertexList.Add(_existingVertices[i]);
+                }
+            }
+
+            for (int i = 0; i < tempVertexList.Count; i++)
+            {
+                Vertex prev = tempVertexList[i];
+                Vertex next = tempVertexList[i];
+
+                if (i != tempVertexList.Count-1)
+                {
+                    next = tempVertexList[i+1];
+                    if (prev.VertexDegree != next.VertexDegree)
+                    {
+                        AddNewGraphEdge(prev, next);
+                    }
+                }
+
+
+            }
+            NotifyPropertyChanged("Graph");
+        }
+            
+
+        public void ReLayoutGraph()
+        {
+            MatrixMethod matrixM = new MatrixMethod(_numberOfVertices, ProbabilityValue);
+            Graph = new Graph(true);
+            _dataTable = new DataTable();
+            _matrix = matrixM.Matrix;
             //lista wierzchołków(pusta)
-            List<Vertex> existingVertices = new List<Vertex>();
+            _existingVertices = new List<Vertex>();
+
+            
 
             //wygenerowanie odpowiedniej ilości wierzchołków
             for (int i = 0; i < _numberOfVertices; i++)
             {
-                existingVertices.Add(new Vertex((i+1).ToString()));
+                _existingVertices.Add(new Vertex((i+1).ToString()));
+                Graph.AddVertex(_existingVertices[i]);
             }
 
-            //dodanie wierzchołków do głównego grafu
-            foreach (Vertex vertex in existingVertices)
-                Graph.AddVertex(vertex);
-
-            //utworzenie kolumn z nagłówkami do macierzy 
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                _dataTable.Columns.Add(new DataColumn((i+1).ToString()));
-            }
-
-
-            //losowanie krawędzi(połączeń) w grafie
             int j = 0;
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                j = i;
-                while (j < _numberOfVertices)
-                {
-                    ArraySingleValue = _random.NextDouble();
-                    if (i != j)
-                    {
-                        if (ArraySingleValue <= ProbabilityValue)
-                        {
-                            ArraySingleValue = 1;
-                            
-                        }
-                        else
-                        {
-                            ArraySingleValue = 0;
-                        }
-                    }
-                    else
-                    {
-                        ArraySingleValue = 0;
-                    }
-                    _matrix[i][j] = ArraySingleValue;
-                    j++;
-                }
-                
-            }
-            
             //dodanie krawędzi między wierzchołkami
             for (int i = 0; i < _numberOfVertices; i++)
             {
+                
                 j = i;
                 while (j < _numberOfVertices)
                 {
                     if (_matrix[i][j] == 1)
                     {
-                        AddNewGraphEdge(existingVertices[i], existingVertices[j]);
+                        AddNewGraphEdge(_existingVertices[i], _existingVertices[j]);
                     }
                     j++;
                 }
             }
 
-            //uzupełnienie drugiej strony tablicy
             for (int i = 0; i < _numberOfVertices; i++)
             {
-                for (j = 0; j < i ; j++)
-                {
-                    _matrix[i][j] = _matrix[j][i];
-                }
-            }
-
-            //wpisanie danych do macierzy
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                var newRow = _dataTable.NewRow();
+                double sum = 0;
                 for (j = 0; j < _numberOfVertices; j++)
                 {
-                    newRow[j] = _matrix[j][i];
+                    sum += _matrix[i][j];
                 }
-                _dataTable.Rows.Add(newRow);
+                _matrix[i][_numberOfVertices] = sum;
+                _existingVertices[i].VertexDegree = (int)sum;
             }
 
             //dane do macierzy połączeń
-            _dataView = _dataTable.DefaultView;
-
+            DataView = matrixM.DataTable.DefaultView;
+            UndirectedGraph = new UndirectedBidirectionalGraph<Vertex, Edge>(Graph);
             //odświeżenie interfejsu
             NotifyPropertyChanged("Graph");
+            NotifyPropertyChanged("UndirectedGraph");
             NotifyPropertyChanged("DataView");
-
+            
         }
+
+
 
         #region Private Methods
         
 
         private Edge AddNewGraphEdge(Vertex from, Vertex to)
         {
-            string edgeString = string.Format("Połączone wierzchołki: {0}-{1}", from.VertexValue, to.VertexValue);
+            string edgeString = string.Format("Connected vertices: {0}-{1}", from.VertexValue, to.VertexValue);
             Color edgeColor = (_random.Next() % 2 == 0) ? Colors.Black : Colors.Red;
             Edge newEdge = new Edge(Visibility.Visible, edgeString, from, to);
             Graph.AddEdge(newEdge);
@@ -264,6 +270,103 @@ namespace euler_graph_generator.ViewModels
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class ConvertPath : IMultiValueConverter
+    {
+
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Debug.Assert(values != null && values.Length == 9, "EdgeRouteToPathConverter should have 9 parameters: pos (1,2), size (3,4) of source; pos (5,6), size (7,8) of target; routeInformation (9).");
+
+            
+            //get the position of the source
+            Point sourcePos = new Point()
+            {
+                X = (values[0] != DependencyProperty.UnsetValue ? (double)values[0] : 0.0),
+                Y = (values[1] != DependencyProperty.UnsetValue ? (double)values[1] : 0.0)
+            };
+            //get the size of the source
+            Size sourceSize = new Size()
+            {
+                Width = (values[2] != DependencyProperty.UnsetValue ? (double)values[2] : 0.0),
+                Height = (values[3] != DependencyProperty.UnsetValue ? (double)values[3] : 0.0)
+            };
+            //get the position of the target
+            Point targetPos = new Point()
+            {
+                X = (values[4] != DependencyProperty.UnsetValue ? (double)values[4] : 0.0),
+                Y = (values[5] != DependencyProperty.UnsetValue ? (double)values[5] : 0.0)
+            };
+            //get the size of the target
+            Size targetSize = new Size()
+            {
+                Width = (values[6] != DependencyProperty.UnsetValue ? (double)values[6] : 0.0),
+                Height = (values[7] != DependencyProperty.UnsetValue ? (double)values[7] : 0.0)
+            };
+
+
+
+            //get the position of the source
+
+            Point[] routeInformation = (values[8] != DependencyProperty.UnsetValue ? (Point[])values[8] : null);
+
+            bool hasRouteInfo = routeInformation != null && routeInformation.Length > 0;
+
+            //
+            // Create the path
+            //
+           Point p1 = GraphConverterHelper.CalculateAttachPoint(sourcePos, sourceSize, (hasRouteInfo ? routeInformation[0] : targetPos));
+           Point p2 = GraphConverterHelper.CalculateAttachPoint(targetPos, targetSize, (hasRouteInfo ? routeInformation[routeInformation.Length - 1] : sourcePos));
+
+
+            PathSegment[] segments = new PathSegment[1 + (hasRouteInfo ? routeInformation.Length : 0)];
+            if (hasRouteInfo)
+                //append route points
+                for (int i = 0; i < routeInformation.Length; i++)
+                    segments[i] = new LineSegment(routeInformation[i], true);
+
+            Point pLast = (hasRouteInfo ? routeInformation[routeInformation.Length - 1] : p1);
+            Vector v = pLast - p2;
+            v = v / v.Length * 0.01;
+            Vector n = new Vector(-v.Y, v.X) * 0.4;
+
+            segments[segments.Length - 1] = new LineSegment(p2 + v, true);
+
+            PathFigureCollection pfc = new PathFigureCollection(2);
+            pfc.Add(new PathFigure(p1, segments, false));
+            //pfc.Add(new PathFigure(p2,
+            //                         new PathSegment[] {
+            //                                            new LineSegment(p2 + v - n, true),
+            //                                            new LineSegment(p2 + v + n, true)}, true));
+
+            return pfc;
+        }
+        private class GraphConverterHelper
+        {
+            public static Point CalculateAttachPoint(Point s, Size sourceSize, Point t)
+            {
+                double[] sides = new double[4];
+                sides[0] = (s.X - sourceSize.Width / 2.0 - t.X) / (s.X - t.X);
+                sides[1] = (s.Y - sourceSize.Height / 2.0 - t.Y) / (s.Y - t.Y);
+                sides[2] = (s.X + sourceSize.Width / 2.0 - t.X) / (s.X - t.X);
+                sides[3] = (s.Y + sourceSize.Height / 2.0 - t.Y) / (s.Y - t.Y);
+
+                double fi = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (sides[i] <= 1)
+                        fi = Math.Max(fi, sides[i]);
+                }
+
+                return t + fi * (s - t);
+            }
+        }
+
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

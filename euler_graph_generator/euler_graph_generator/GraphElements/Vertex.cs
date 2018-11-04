@@ -9,10 +9,11 @@ namespace euler_graph_generator.GraphElements
     public class Vertex
     {
         public string VertexValue { get; set; }
-
+        public int VertexDegree { get; set; }
         public Vertex(string value)
         {
             VertexValue = value;
         }
+
     }
 }
