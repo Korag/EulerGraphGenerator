@@ -111,7 +111,7 @@
     </Style>
     <Style x:Key="Label" TargetType="{x:Type Label}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
-        <Setter Property="Foreground" Value="#FFFFF861"/>
+        <Setter Property="Foreground" Value="#FFA81860"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="FontFamily" Value="Century"/>
         <Setter Property="FontSize"  Value="22" />
