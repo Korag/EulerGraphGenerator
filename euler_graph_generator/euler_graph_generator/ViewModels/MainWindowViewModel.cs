@@ -34,7 +34,7 @@ namespace euler_graph_generator.ViewModels
     {
 
         #region Private Data
-
+        private Stack<Vertex>[] selector = new Stack<Vertex>[3];//tablica listy dla wierzchołków o różnych stopniach(0 stopni, parzyste oraz nieprzyste)
         private DataTable _dataTable;
         private Random _random = new Random();
         private double[][] _matrix;
@@ -134,47 +134,89 @@ namespace euler_graph_generator.ViewModels
 
         public void RepairGraph()
         {
-            double[] tempTab = new double[_numberOfVertices];
-            List<double> tempList = new List<double>();
-            List<Vertex> tempVertexList = new List<Vertex>();
-            int k = 0;
-            for (int i = 0; i < _numberOfVertices; i++)
+            var selector = GetVertexDegreeInfo(_matrix, _existingVertices);
+
+            while (selector[1].Count>0)
             {
-                if (_matrix[i][_numberOfVertices] == 0)
+                while (selector[0].Count>0)
                 {
-                    AddNewGraphEdge(_existingVertices[i], _existingVertices[_random.Next(0, _numberOfVertices-1)]);
-                }
 
-            }
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                tempTab[i] = _matrix[i][_numberOfVertices];
-            }
-
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                if (tempTab[i]%2!=0)
-                {
-                    tempVertexList.Add(_existingVertices[i]);
-                }
-            }
-
-            for (int i = 0; i < tempVertexList.Count; i++)
-            {
-                Vertex prev = tempVertexList[i];
-                Vertex next = tempVertexList[i];
-
-                if (i != tempVertexList.Count-1)
-                {
-                    next = tempVertexList[i+1];
-                    if (prev.VertexDegree != next.VertexDegree)
+                    if (selector[1].Count>=2)
                     {
-                        AddNewGraphEdge(prev, next);
+                        var start = selector[0].Pop();
+                        var end1 = selector[1].Pop();
+                        var end2 = selector[1].Pop();
+
+                        _matrix[start.Index][end1.Index] = 1;
+                        _matrix[end1.Index][start.Index] = 1;
+                        _matrix[start.Index][end2.Index] = 1;
+                        _matrix[end2.Index][start.Index] = 1;
+                    }
+                    
+                    selector = GetVertexDegreeInfo(_matrix, _existingVertices);
+
+                    if (selector[1].Count == 0 && selector[0].Count>0)
+                    {
+                            var start = selector[0].Pop();
+                            var end = selector[2].Pop();
+                            _matrix[start.Index][end.Index] = 1;
+                            _matrix[end.Index][start.Index] = 1;
+                        if (end.Neighbors.Count>0)
+                        {
+                            _matrix[start.Index][end.Neighbors[0].Index] = 1;
+                            _matrix[end.Neighbors[0].Index][start.Index] = 1;
+                            _matrix[end.Index][end.Neighbors[0].Index] = 0;
+                            _matrix[end.Neighbors[0].Index][end.Index] = 0;
+                        }
                     }
                 }
 
+                while (selector[1].Count > 0)
+                {
+                    List<Vertex> connection = new List<Vertex>();
+                    connection.Add(selector[1].Pop());
+                    connection.Add(selector[1].Pop());
 
+                    if (_matrix[connection[0].Index][connection[1].Index]==1)
+                    {
+                        if (connection[0].Neighbors.Count == 1 && connection[1].Neighbors.Count == 1)
+                        {
+                            _matrix[connection[0].Index][connection[1].Index] = 0;
+                            _matrix[connection[1].Index][connection[0].Index] = 0;
+                        }
+                        else
+                        {
+                            if (connection[0].Neighbors.Count > 1)
+                            {
+                                var helpList = connection[0].Neighbors.Where(v => v.Index != connection[1].Index).ToList();
+
+                                _matrix[connection[0].Index][helpList[0].Index] = 0;
+                                _matrix[helpList[0].Index][connection[0].Index] = 0;
+                            }
+                            else
+                            {
+                                var helpList = connection[1].Neighbors.Where(v => v.Index != connection[0].Index).ToList();
+
+                                if (helpList.Count>0 && connection.Count>0)
+                                {
+                                    _matrix[connection[1].Index][helpList[0].Index] = 0;
+                                    _matrix[helpList[0].Index][connection[1].Index] = 0;
+                                }
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _matrix[connection[0].Index][connection[1].Index] = 1;
+                        _matrix[connection[1].Index][connection[0].Index] = 1;
+                    }
+                    
+                }
+                selector = GetVertexDegreeInfo(_matrix, _existingVertices);
             }
+            SetVertexNeighbors();
+            GenerateEdges();
             NotifyPropertyChanged("Graph");
         }
             
@@ -193,36 +235,18 @@ namespace euler_graph_generator.ViewModels
             //wygenerowanie odpowiedniej ilości wierzchołków
             for (int i = 0; i < _numberOfVertices; i++)
             {
-                _existingVertices.Add(new Vertex((i+1).ToString()));
+                _existingVertices.Add(new Vertex((i+1).ToString(),i));
                 Graph.AddVertex(_existingVertices[i]);
             }
 
             int j = 0;
             //dodanie krawędzi między wierzchołkami
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                
-                j = i;
-                while (j < _numberOfVertices)
-                {
-                    if (_matrix[i][j] == 1)
-                    {
-                        AddNewGraphEdge(_existingVertices[i], _existingVertices[j]);
-                    }
-                    j++;
-                }
-            }
+            GenerateEdges();
+            //suma
+            CalculateTheSum();
 
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                double sum = 0;
-                for (j = 0; j < _numberOfVertices; j++)
-                {
-                    sum += _matrix[i][j];
-                }
-                _matrix[i][_numberOfVertices] = sum;
-                _existingVertices[i].VertexDegree = (int)sum;
-            }
+            SetVertexNeighbors();
+
 
             //dane do macierzy połączeń
             DataView = matrixM.DataTable.DefaultView;
@@ -237,7 +261,82 @@ namespace euler_graph_generator.ViewModels
 
 
         #region Private Methods
-        
+        private void GenerateEdges()
+        {
+            for (int i = 0; i < _numberOfVertices; i++)
+            {
+
+                int j = i;
+                while (j < _numberOfVertices)
+                {
+                    if (_matrix[i][j] == 1)
+                    {
+                        AddNewGraphEdge(_existingVertices[i], _existingVertices[j]);
+                    }
+                    j++;
+                }
+            }
+        }
+
+        private void SetVertexNeighbors()
+        {
+            for (int i = 0; i < _matrix.Length; i++)
+            {
+                _existingVertices[i].Neighbors = new List<Vertex>();
+                for (int k = 0; k < _matrix[i].Length - 1; k++)
+                {
+                    if (_matrix[i][k] == 1)
+                    {
+                        _existingVertices[i].Neighbors.Add(_existingVertices[k]);
+                    }
+                }
+            }
+        }
+        private void CalculateTheSum()
+        {
+            for (int i = 0; i < _numberOfVertices; i++)
+            {
+                double sum = 0;
+                for (int j = 0; j < _numberOfVertices; j++)
+                {
+                    sum += _matrix[i][j];
+                }
+                _matrix[i][_numberOfVertices] = sum;
+                _existingVertices[i].VertexDegree = (int)sum;
+            }
+        }
+        private Stack<Vertex>[] GetVertexDegreeInfo(double[][] matrix, List<Vertex> verticesList)
+        {
+
+            Stack<Vertex>[] tempArray = new Stack<Vertex>[3];
+            tempArray[0] = new Stack<Vertex>();
+            tempArray[1] = new Stack<Vertex>();
+            tempArray[2] = new Stack<Vertex>();
+            CalculateTheSum();
+            //BŁĄD: suma nie jest zmieniana przez co wierzchołki są niepotzebnie dodawane
+            //rozwiązanie zrobić z obliczania sumy funkcję a jej wywoanie dodać na początku tej funkcji
+            for (int i = 0; i < matrix.Length; i++)
+            {
+                var lastColumn = matrix[i].Length-1;
+                //0 stopien
+                if (_matrix[i][lastColumn] == 0)
+                {
+                    tempArray[0].Push(verticesList[i]);
+                }
+                //nieparzyste
+                if (_matrix[i][lastColumn] % 2 == 1)
+                {
+                    tempArray[1].Push(verticesList[i]);
+                }
+                //parzyste
+                if (_matrix[i][lastColumn] % 2 == 0)
+                {
+                    tempArray[2].Push(verticesList[i]);
+                }
+            }
+
+            return tempArray;
+        }
 
         private Edge AddNewGraphEdge(Vertex from, Vertex to)
         {
@@ -261,6 +360,8 @@ namespace euler_graph_generator.ViewModels
 
         #endregion
     }
+
+    #region Converters
     public class EdgeVisibilityConverter : IValueConverter
     {
 
@@ -281,7 +382,7 @@ namespace euler_graph_generator.ViewModels
         {
             Debug.Assert(values != null && values.Length == 9, "EdgeRouteToPathConverter should have 9 parameters: pos (1,2), size (3,4) of source; pos (5,6), size (7,8) of target; routeInformation (9).");
 
-            
+
             //get the position of the source
             Point sourcePos = new Point()
             {
@@ -318,8 +419,8 @@ namespace euler_graph_generator.ViewModels
             //
             // Create the path
             //
-           Point p1 = GraphConverterHelper.CalculateAttachPoint(sourcePos, sourceSize, (hasRouteInfo ? routeInformation[0] : targetPos));
-           Point p2 = GraphConverterHelper.CalculateAttachPoint(targetPos, targetSize, (hasRouteInfo ? routeInformation[routeInformation.Length - 1] : sourcePos));
+            Point p1 = GraphConverterHelper.CalculateAttachPoint(sourcePos, sourceSize, (hasRouteInfo ? routeInformation[0] : targetPos));
+            Point p2 = GraphConverterHelper.CalculateAttachPoint(targetPos, targetSize, (hasRouteInfo ? routeInformation[routeInformation.Length - 1] : sourcePos));
 
 
             PathSegment[] segments = new PathSegment[1 + (hasRouteInfo ? routeInformation.Length : 0)];
@@ -371,4 +472,6 @@ namespace euler_graph_generator.ViewModels
             throw new NotImplementedException();
         }
     }
+    #endregion
+
 }

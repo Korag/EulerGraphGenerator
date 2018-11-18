@@ -38,7 +38,7 @@ namespace euler_graph_generator
 
         private void Napraw_Click(object sender, RoutedEventArgs e)
         {
-            //vm.HideEdge("1","2");
+            vm.RepairGraph();
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
