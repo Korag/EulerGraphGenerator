@@ -213,7 +213,12 @@ namespace euler_graph_generator.ViewModels
                     }
                     
                 }
+
                 selector = GetVertexDegreeInfo(_matrix, _existingVertices);
+                if (selector[1].Count == 2)
+                {
+                    break;
+                }
             }
             SetVertexNeighbors();
             GenerateEdges();
