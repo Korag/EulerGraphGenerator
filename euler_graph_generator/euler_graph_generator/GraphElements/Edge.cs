@@ -12,8 +12,8 @@ namespace euler_graph_generator.GraphElements
 {
     public class Edge : Edge<Vertex>, INotifyPropertyChanged
     {
+        //ID == opis(wyświetla się w UI jak najedzie się na krawędź)
         private string id;
-
         public string ID
         {
             get { return id; }
@@ -24,13 +24,13 @@ namespace euler_graph_generator.GraphElements
             }
         }
 
-        public Color EdgeColor { get; set; }
-        public Visibility EdgeVisibility { get; set; }
+        public bool IsVisited { get; set; } = false;//do ścieżki/cyklu Eulera
+        public SolidColorBrush EdgeColor { get; set; } = Brushes.LimeGreen;//do ścieżki/cyklu Eulera
 
-        public Edge(Visibility edgeVisibility, string id, Vertex source, Vertex target)
+
+        public Edge(string id, Vertex source, Vertex target)
             : base(source, target)
         {
-            EdgeVisibility = edgeVisibility;
             ID = id;
         }
 

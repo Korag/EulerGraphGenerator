@@ -1,4 +1,5 @@
-﻿using euler_graph_generator.GraphElements;
+﻿using euler_graph_generator.AdditionalMethods;
+using euler_graph_generator.GraphElements;
 using euler_graph_generator.GraphMethods;
 using GraphSharp.Controls;
 using QuickGraph;
@@ -10,6 +11,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -17,12 +19,6 @@ using System.Windows.Media;
 
 namespace euler_graph_generator.ViewModels
 {
-    //DO ZROBIENIA: 1. przycisk reset 2. zapis do pliku 3. naprawa grafu 
-    //              4. podzielenie głównej metody na mniejsze funkcje 5. walidacja danych 6. lista algorytmów generowania grafu po polsku
-    //              7. grafy nieskierowane 8. nagłówki do wierszy w macierzy incydencji 9. optymalizacja? xd 10. sprawozdanie :)
-
-    //klasa odpowiedzialna za rysowanie -> taki canvas dla grafów
-
     public class GraphLayout : GraphLayout<Vertex, Edge, Graph>
     {
         public GraphLayout()
@@ -32,19 +28,20 @@ namespace euler_graph_generator.ViewModels
     }
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-
         #region Private Data
-        private Stack<Vertex>[] selector = new Stack<Vertex>[3];//tablica listy dla wierzchołków o różnych stopniach(0 stopni, parzyste oraz nieprzyste)
-        private DataTable _dataTable;
-        private Random _random = new Random();
-        private double[][] _matrix;
-        private List<Vertex> _existingVertices;
+        //coś się waliło z jedną macierzą dlatego dałem drugą xd
+        private double[][] _matrix;//macierz incydencji do obliczeń
+        private double[][] _UIMatrix;//macierz do UI
+        private List<Vertex> _existingVertices;//lista przechowująca wierzchołki
         #endregion
 
-        #region Properties
-        public List<string> LayoutAlgorithmTypes { get; } = new List<string>();
-
-        public DataView DataView { get; private set; }
+        #region Public Data
+        public DataTable DataTable { get; set; } = new DataTable();//macierz w UI
+        public DataView DataView { get; private set; }//macierz w UI
+        public List<string> LayoutAlgorithmTypes { get; } = new List<string>();//lista z algorytmami rysowania grafów
+        public List<Edge> EdgesToColor { get; set; } = new List<Edge>();//Lista która zapewnia prawidłową kolejność rysowania ścieżki/cyklu Eulera
+        public readonly BackgroundWorker worker = new BackgroundWorker();//to służy do wykonywania naprawy grafu w odzielnym wątku
+        
 
         private int _numberOfVertices;
         public int NumberOfVertices
@@ -57,7 +54,6 @@ namespace euler_graph_generator.ViewModels
             }
 
         }
-
 
         private double _probabilityValue;
         public double ProbabilityValue
@@ -104,13 +100,9 @@ namespace euler_graph_generator.ViewModels
         }
         #endregion
 
-        #region Ctor
+        #region Constructor
         public MainWindowViewModel()
         {
-            _dataTable = new DataTable();
-            Graph = new Graph(true);
-            _random = new Random();
-
             //Algorytmy rysowania/generowania grafów
             LayoutAlgorithmTypes.Add("BoundedFR");
             LayoutAlgorithmTypes.Add("Circular");
@@ -124,238 +116,254 @@ namespace euler_graph_generator.ViewModels
 
             //Domyślny algorytm
             LayoutAlgorithmType = "Circular";
+
+
+            worker.DoWork += worker_DoWork;
+            worker.ProgressChanged += worker_ProgressChanged;
+            worker.WorkerSupportsCancellation = true;
+            worker.WorkerReportsProgress = true;
         }
         #endregion
 
-        public void HideEdge(string from, string to)
+
+        private void RefreshMatrixUi()
         {
-            Graph.Edges.Where(e => e.Source.VertexValue == from && e.Target.VertexValue == to).FirstOrDefault().EdgeVisibility = Visibility.Hidden;
+            _UIMatrix =  MatrixMethod.GenerateUIMatrix(_UIMatrix, Graph);
+            DataTable = new DataTable();
+            MatrixMethod.SetMatrixColumns(DataTable);
+            MatrixMethod.FillDataTable(_UIMatrix, DataTable);
+            DataView = DataTable.DefaultView;
+            NotifyPropertyChanged("Graph");
+            NotifyPropertyChanged("DataView");
+            NotifyPropertyChanged("UndirectedGraph");
         }
 
-        public void RepairGraph()
+
+
+
+        #region Graph repair
+        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            var selector = GetVertexDegreeInfo(_matrix, _existingVertices);
+            ////aktualizacja macierzy
 
-            while (selector[1].Count>0)
+            _matrix = MatrixMethod.FillTheSecondHalfOfTheMatrix(_matrix);
+
+            EdgeMethod.GenerateEdges(_matrix, _existingVertices, Graph);
+
+            ////aktualizacja tabeli
+            VertexMethod.CalculateTheSum(_matrix, _existingVertices);
+            VertexMethod.SetVertexNeighbors(_matrix, _existingVertices);
+
+            RefreshMatrixUi();
+        }
+
+        //metoda naprawy grafów autorem jest Owner, zrobiłem delikatny tunining-> mniej się sypie xd
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
+            if (Graph.Edges.Count() >= 1)
             {
-                while (selector[0].Count>0)
+                while (selector[1].Count > 0)
                 {
-
-                    if (selector[1].Count>=2)
+                    while (selector[0].Count > 0)
                     {
-                        var start = selector[0].Pop();
-                        var end1 = selector[1].Pop();
-                        var end2 = selector[1].Pop();
 
-                        _matrix[start.Index][end1.Index] = 1;
-                        _matrix[end1.Index][start.Index] = 1;
-                        _matrix[start.Index][end2.Index] = 1;
-                        _matrix[end2.Index][start.Index] = 1;
-                    }
-                    
-                    selector = GetVertexDegreeInfo(_matrix, _existingVertices);
+                        if (selector[1].Count >= 2)
+                        {
+                            var start = selector[0].Pop();
+                            var end1 = selector[1].Pop();
+                            var end2 = selector[1].Pop();
 
-                    if (selector[1].Count == 0 && selector[0].Count>0)
-                    {
+                            _matrix[start.Index][end1.Index] = 1;
+                            _matrix[end1.Index][start.Index] = 1;
+                            _matrix[start.Index][end2.Index] = 1;
+                            _matrix[end2.Index][start.Index] = 1;
+                            Report();
+                        }
+
+                        selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
+
+                        if (selector[1].Count == 0 && selector[0].Count > 0)
+                        {
                             var start = selector[0].Pop();
                             var end = selector[2].Pop();
                             _matrix[start.Index][end.Index] = 1;
                             _matrix[end.Index][start.Index] = 1;
-                        if (end.Neighbors.Count>0)
-                        {
-                            _matrix[start.Index][end.Neighbors[0].Index] = 1;
-                            _matrix[end.Neighbors[0].Index][start.Index] = 1;
-                            _matrix[end.Index][end.Neighbors[0].Index] = 0;
-                            _matrix[end.Neighbors[0].Index][end.Index] = 0;
-                        }
-                    }
-                }
-
-                while (selector[1].Count > 0)
-                {
-                    List<Vertex> connection = new List<Vertex>();
-                    connection.Add(selector[1].Pop());
-                    connection.Add(selector[1].Pop());
-
-                    if (_matrix[connection[0].Index][connection[1].Index]==1)
-                    {
-                        if (connection[0].Neighbors.Count == 1 && connection[1].Neighbors.Count == 1)
-                        {
-                            _matrix[connection[0].Index][connection[1].Index] = 0;
-                            _matrix[connection[1].Index][connection[0].Index] = 0;
-                        }
-                        else
-                        {
-                            if (connection[0].Neighbors.Count > 1)
+                            if (end.Neighbors.Count > 0)
                             {
-                                var helpList = connection[0].Neighbors.Where(v => v.Index != connection[1].Index).ToList();
+                                _matrix[start.Index][end.Neighbors[0].Index] = 1;
+                                _matrix[end.Neighbors[0].Index][start.Index] = 1;
+                                _matrix[end.Index][end.Neighbors[0].Index] = 0;
+                                _matrix[end.Neighbors[0].Index][end.Index] = 0;
+                                Report();
+                            }
+                            Report();
+                        }
+                        Report();
+                    }
 
-                                _matrix[connection[0].Index][helpList[0].Index] = 0;
-                                _matrix[helpList[0].Index][connection[0].Index] = 0;
+                    while (selector[1].Count > 0)
+                    {
+                        List<Vertex> connection = new List<Vertex>();
+                        connection.Add(selector[1].Pop());
+                        connection.Add(selector[1].Pop());
+
+                        if (_matrix[connection[0].Index][connection[1].Index] == 1)
+                        {
+                            if (connection[0].Neighbors.Count == 1 && connection[1].Neighbors.Count == 1)
+                            {
+                                _matrix[connection[0].Index][connection[1].Index] = 0;
+                                _matrix[connection[1].Index][connection[0].Index] = 0;
+                                Report();
                             }
                             else
                             {
-                                var helpList = connection[1].Neighbors.Where(v => v.Index != connection[0].Index).ToList();
-
-                                if (helpList.Count>0 && connection.Count>0)
+                                if (connection[0].Neighbors.Count > 1)
                                 {
-                                    _matrix[connection[1].Index][helpList[0].Index] = 0;
-                                    _matrix[helpList[0].Index][connection[1].Index] = 0;
-                                }
+                                    var helpList = connection[0].Neighbors.Where(v => v.Index != connection[1].Index).ToList();
 
+                                    _matrix[connection[0].Index][helpList[0].Index] = 0;
+                                    _matrix[helpList[0].Index][connection[0].Index] = 0;
+                                    Report();
+                                }
+                                else
+                                {
+                                    var helpList = connection[1].Neighbors.Where(v => v.Index != connection[0].Index).ToList();
+
+                                    if (helpList.Count > 0 && connection.Count > 0)
+                                    {
+                                        _matrix[connection[1].Index][helpList[0].Index] = 0;
+                                        _matrix[helpList[0].Index][connection[1].Index] = 0;
+                                        Report();
+                                    }
+
+                                }
                             }
+
                         }
+                        else
+                        {
+                            _matrix[connection[0].Index][connection[1].Index] = 1;
+                            _matrix[connection[1].Index][connection[0].Index] = 1;
+                            Report();
+                        }
+                        Report();
+                    }
+                    selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
+                    if (selector[1].Count == 2)
+                    {
+                        Report();
+                        break;
+                    }
+                    Report();
+                }
+            }
+            else
+            {
+
+                for (int i = 0; i < _existingVertices.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        _matrix[i][i + 1] = 1;
+                        _matrix[i][_existingVertices.Count - 1] = 1;
+                        Report();
+                    }
+                    else if (i == _existingVertices.Count - 1)
+                    {
+                        _matrix[i][0] = 1;
+                        _matrix[i][_existingVertices.Count - 1] = 1;
+                        Report();
                     }
                     else
                     {
-                        _matrix[connection[0].Index][connection[1].Index] = 1;
-                        _matrix[connection[1].Index][connection[0].Index] = 1;
+                        _matrix[i][i + 1] = 1;
+                        _matrix[i][i - 1] = 1;
+                        Report();
                     }
-                    
-                }
-
-                selector = GetVertexDegreeInfo(_matrix, _existingVertices);
-                if (selector[1].Count == 2)
-                {
-                    break;
                 }
             }
-            SetVertexNeighbors();
-            GenerateEdges();
-            NotifyPropertyChanged("Graph");
+            Report();
+            RefreshMatrixUi();
+            worker.CancelAsync();
         }
-            
+        private void Report()
+        {
+            worker.ReportProgress(0);
+            Thread.Sleep(500);
+        }
 
+        #endregion
+
+        #region Public methods
         public void ReLayoutGraph()
         {
-            MatrixMethod matrixM = new MatrixMethod(_numberOfVertices, ProbabilityValue);
-            Graph = new Graph(true);
-            _dataTable = new DataTable();
-            _matrix = matrixM.Matrix;
-            //lista wierzchołków(pusta)
-            _existingVertices = new List<Vertex>();
+            //dane potrzebne w metodach obsługujących macierz
+            MatrixMethod.NumberOfVertices = _numberOfVertices;
+            MatrixMethod.ProbabilityValue = _probabilityValue;
 
-            
+            Graph = new Graph(true);//nowy graf
+            _matrix = MatrixMethod.FillTheMatrix();//macierz incydencji
+            _existingVertices = new List<Vertex>();//lista przechowująca wierzchołki
 
             //wygenerowanie odpowiedniej ilości wierzchołków
             for (int i = 0; i < _numberOfVertices; i++)
             {
-                _existingVertices.Add(new Vertex((i+1).ToString(),i));
+                _existingVertices.Add(new Vertex((i + 1).ToString(), i));
                 Graph.AddVertex(_existingVertices[i]);
             }
 
-            int j = 0;
-            //dodanie krawędzi między wierzchołkami
-            GenerateEdges();
-            //suma
-            CalculateTheSum();
+            //generowanie krawędzi na podstawie macierzy
+            EdgeMethod.GenerateEdges(_matrix, _existingVertices, Graph);
 
-            SetVertexNeighbors();
+            //suma jest zapisana w ostatniej kolumnie macierzy oraz we właściwości obiektu vertex(VertexDegree)<=potrzebne w naprawie
+            VertexMethod.CalculateTheSum(_matrix, _existingVertices);
 
+            //zapisanie wierzołków sąsiadujących ze sobą(potrzebne w naprawie)
+            VertexMethod.SetVertexNeighbors(_matrix, _existingVertices);
 
-            //dane do macierzy połączeń
-            DataView = matrixM.DataTable.DefaultView;
+            UndirectedGraph = new UndirectedBidirectionalGraph<Vertex, Edge>(Graph);//coś jak canvas
+
+            
+            RefreshMatrixUi();//odświeżenie UI
+        }
+
+        //sprawdzanie spójności
+        public bool DepthFirstSearch()
+        {
+            return ConnectionChecker.DepthFirstSearch(Graph);
+        }
+        //sprawdzanie czy eulerowski
+        public bool CheckIfEuler()
+        {
+            return EulerChecker.CheckIfEuler(Graph, EdgesToColor);
+        }
+
+        //resetowanie danych
+        public void ResetData()
+        {
+            Graph = new Graph(true);
             UndirectedGraph = new UndirectedBidirectionalGraph<Vertex, Edge>(Graph);
-            //odświeżenie interfejsu
+
+            _matrix = null;
+            _UIMatrix = null;
+            _existingVertices = null;
+            DataView = null;
+            DataTable = null;
+
             NotifyPropertyChanged("Graph");
             NotifyPropertyChanged("UndirectedGraph");
             NotifyPropertyChanged("DataView");
-            
         }
-
-
-
-        #region Private Methods
-        private void GenerateEdges()
+        //zapis do pliku
+        public void SaveToFile(bool isConsistent, bool isEuler, string message)
         {
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-
-                int j = i;
-                while (j < _numberOfVertices)
-                {
-                    if (_matrix[i][j] == 1)
-                    {
-                        AddNewGraphEdge(_existingVertices[i], _existingVertices[j]);
-                    }
-                    j++;
-                }
-            }
-        }
-
-        private void SetVertexNeighbors()
-        {
-            for (int i = 0; i < _matrix.Length; i++)
-            {
-                _existingVertices[i].Neighbors = new List<Vertex>();
-                for (int k = 0; k < _matrix[i].Length - 1; k++)
-                {
-                    if (_matrix[i][k] == 1)
-                    {
-                        _existingVertices[i].Neighbors.Add(_existingVertices[k]);
-                    }
-                }
-            }
-        }
-        private void CalculateTheSum()
-        {
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                double sum = 0;
-                for (int j = 0; j < _numberOfVertices; j++)
-                {
-                    sum += _matrix[i][j];
-                }
-                _matrix[i][_numberOfVertices] = sum;
-                _existingVertices[i].VertexDegree = (int)sum;
-            }
-        }
-        private Stack<Vertex>[] GetVertexDegreeInfo(double[][] matrix, List<Vertex> verticesList)
-        {
-
-            Stack<Vertex>[] tempArray = new Stack<Vertex>[3];
-            tempArray[0] = new Stack<Vertex>();
-            tempArray[1] = new Stack<Vertex>();
-            tempArray[2] = new Stack<Vertex>();
-            CalculateTheSum();
-            //BŁĄD: suma nie jest zmieniana przez co wierzchołki są niepotzebnie dodawane
-            //rozwiązanie zrobić z obliczania sumy funkcję a jej wywoanie dodać na początku tej funkcji
-            for (int i = 0; i < matrix.Length; i++)
-            {
-                var lastColumn = matrix[i].Length-1;
-                //0 stopien
-                if (_matrix[i][lastColumn] == 0)
-                {
-                    tempArray[0].Push(verticesList[i]);
-                }
-                //nieparzyste
-                if (_matrix[i][lastColumn] % 2 == 1)
-                {
-                    tempArray[1].Push(verticesList[i]);
-                }
-                //parzyste
-                if (_matrix[i][lastColumn] % 2 == 0)
-                {
-                    tempArray[2].Push(verticesList[i]);
-                }
-            }
-
-            return tempArray;
-        }
-
-        private Edge AddNewGraphEdge(Vertex from, Vertex to)
-        {
-            string edgeString = string.Format("Connected vertices: {0}-{1}", from.VertexValue, to.VertexValue);
-            Color edgeColor = (_random.Next() % 2 == 0) ? Colors.Black : Colors.Red;
-            Edge newEdge = new Edge(Visibility.Visible, edgeString, from, to);
-            Graph.AddEdge(newEdge);
-            return newEdge;
+            FileSaver.SaveToFile(Graph, _probabilityValue, _UIMatrix, isConsistent, isEuler, message);
         }
         #endregion
 
-
         #region INotifyPropertyChanged Implementation
-
+        //tym w WPF'ie odświeżamy UI
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string info)
@@ -365,118 +373,4 @@ namespace euler_graph_generator.ViewModels
 
         #endregion
     }
-
-    #region Converters
-    public class EdgeVisibilityConverter : IValueConverter
-    {
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return (Visibility)value;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-    public class ConvertPath : IMultiValueConverter
-    {
-
-        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            Debug.Assert(values != null && values.Length == 9, "EdgeRouteToPathConverter should have 9 parameters: pos (1,2), size (3,4) of source; pos (5,6), size (7,8) of target; routeInformation (9).");
-
-
-            //get the position of the source
-            Point sourcePos = new Point()
-            {
-                X = (values[0] != DependencyProperty.UnsetValue ? (double)values[0] : 0.0),
-                Y = (values[1] != DependencyProperty.UnsetValue ? (double)values[1] : 0.0)
-            };
-            //get the size of the source
-            Size sourceSize = new Size()
-            {
-                Width = (values[2] != DependencyProperty.UnsetValue ? (double)values[2] : 0.0),
-                Height = (values[3] != DependencyProperty.UnsetValue ? (double)values[3] : 0.0)
-            };
-            //get the position of the target
-            Point targetPos = new Point()
-            {
-                X = (values[4] != DependencyProperty.UnsetValue ? (double)values[4] : 0.0),
-                Y = (values[5] != DependencyProperty.UnsetValue ? (double)values[5] : 0.0)
-            };
-            //get the size of the target
-            Size targetSize = new Size()
-            {
-                Width = (values[6] != DependencyProperty.UnsetValue ? (double)values[6] : 0.0),
-                Height = (values[7] != DependencyProperty.UnsetValue ? (double)values[7] : 0.0)
-            };
-
-
-
-            //get the position of the source
-
-            Point[] routeInformation = (values[8] != DependencyProperty.UnsetValue ? (Point[])values[8] : null);
-
-            bool hasRouteInfo = routeInformation != null && routeInformation.Length > 0;
-
-            //
-            // Create the path
-            //
-            Point p1 = GraphConverterHelper.CalculateAttachPoint(sourcePos, sourceSize, (hasRouteInfo ? routeInformation[0] : targetPos));
-            Point p2 = GraphConverterHelper.CalculateAttachPoint(targetPos, targetSize, (hasRouteInfo ? routeInformation[routeInformation.Length - 1] : sourcePos));
-
-
-            PathSegment[] segments = new PathSegment[1 + (hasRouteInfo ? routeInformation.Length : 0)];
-            if (hasRouteInfo)
-                //append route points
-                for (int i = 0; i < routeInformation.Length; i++)
-                    segments[i] = new LineSegment(routeInformation[i], true);
-
-            Point pLast = (hasRouteInfo ? routeInformation[routeInformation.Length - 1] : p1);
-            Vector v = pLast - p2;
-            v = v / v.Length * 0.01;
-            Vector n = new Vector(-v.Y, v.X) * 0.4;
-
-            segments[segments.Length - 1] = new LineSegment(p2 + v, true);
-
-            PathFigureCollection pfc = new PathFigureCollection(2);
-            pfc.Add(new PathFigure(p1, segments, false));
-            //pfc.Add(new PathFigure(p2,
-            //                         new PathSegment[] {
-            //                                            new LineSegment(p2 + v - n, true),
-            //                                            new LineSegment(p2 + v + n, true)}, true));
-
-            return pfc;
-        }
-        private class GraphConverterHelper
-        {
-            public static Point CalculateAttachPoint(Point s, Size sourceSize, Point t)
-            {
-                double[] sides = new double[4];
-                sides[0] = (s.X - sourceSize.Width / 2.0 - t.X) / (s.X - t.X);
-                sides[1] = (s.Y - sourceSize.Height / 2.0 - t.Y) / (s.Y - t.Y);
-                sides[2] = (s.X + sourceSize.Width / 2.0 - t.X) / (s.X - t.X);
-                sides[3] = (s.Y + sourceSize.Height / 2.0 - t.Y) / (s.Y - t.Y);
-
-                double fi = 0;
-                for (int i = 0; i < 4; i++)
-                {
-                    if (sides[i] <= 1)
-                        fi = Math.Max(fi, sides[i]);
-                }
-
-                return t + fi * (s - t);
-            }
-        }
-
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-    #endregion
-
 }

@@ -88,9 +88,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AdditionalMethods\ConnectionChecker.cs" />
+    <Compile Include="AdditionalMethods\EulerChecker.cs" />
+    <Compile Include="AdditionalMethods\FileSaver.cs" />
     <Compile Include="GraphMethods\EdgeMethod.cs" />
     <Compile Include="GraphMethods\MatrixMethod.cs" />
     <Compile Include="GraphMethods\VertexMethod.cs" />
+    <Compile Include="ValueConverters\ConvertPath.cs" />
+    <Compile Include="ValueConverters\EdgeColorConverter.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -113,7 +118,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Parameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

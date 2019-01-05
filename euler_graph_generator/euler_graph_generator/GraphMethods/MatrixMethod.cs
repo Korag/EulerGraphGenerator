@@ -1,4 +1,5 @@
-﻿using System;
+﻿using euler_graph_generator.GraphElements;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -7,65 +8,70 @@ using System.Threading.Tasks;
 
 namespace euler_graph_generator.GraphMethods
 {
-    public class MatrixMethod
+    public static class MatrixMethod
     {
+        public static int NumberOfVertices { get; set; }
+        public static double ProbabilityValue { get; set; }
 
-        public double[][] Matrix { get; private set; }
-        public DataTable DataTable {get; private set;}
-
-        private int _numberOfVertices { get; set; }
-        private double _probabilityValue { get; set; }
-
-        public MatrixMethod(int numberOfVertices, double probabilityValue)
+        //utworzenie nagłówków w macierzy(UI)
+        public static void SetMatrixColumns(DataTable dataTable)
         {
 
-            _numberOfVertices = numberOfVertices;
-            _probabilityValue = probabilityValue;
-
-            DataTable = new DataTable();
-
-            Matrix = new double[numberOfVertices][];
-            for (int i = 0; i < _numberOfVertices; i++)
+            for (int i = -1; i <= NumberOfVertices; i++)
             {
-                Matrix[i] = new double[_numberOfVertices + 1];
-            }
-            
-            SetMatrixColumns();
-            FillTheMatrix();
-            FillTheSecondHalfOfTheMatrix();
-            CalculateMatrixSum();
-            FillDataTable();
-        }
-
-        private void SetMatrixColumns()
-        {
-            for (int i = 0; i < _numberOfVertices + 1; i++)
-            {
-                if (i == _numberOfVertices)
+                if (i == NumberOfVertices)
                 {
-                    DataTable.Columns.Add(new DataColumn("Suma"));
+                    dataTable.Columns.Add(new DataColumn("Suma"));
+                }
+                else if (i == -1)
+                {
+                    dataTable.Columns.Add(new DataColumn("Wierzchłoki"));
                 }
                 else
                 {
-                    DataTable.Columns.Add(new DataColumn((i + 1).ToString()));
+                    dataTable.Columns.Add(new DataColumn((i + 1).ToString()));
                 }
             }
         }
-
-        private void FillTheMatrix()
+        //wiersze z danymi w macierzy(UI)
+        public static void FillDataTable(double[][] matrix, DataTable dataTable)
         {
+            dataTable.Rows.Clear();
+            for (int i = 0; i < NumberOfVertices; i++)
+            {
+                var newRow = dataTable.NewRow();
+
+                for (int j = 0; j <= NumberOfVertices; j++)
+                {
+                    newRow[j + 1] = matrix[i][j];
+                }
+                newRow[0] = i + 1;
+                dataTable.Rows.Add(newRow);
+            }
+        }
+        //wygenerowanie początkowych danych w macierzy na podstawie prawdopodobieństwa
+        public static double[][] FillTheMatrix()
+        {
+            //utworzenie macierzy
+            double[][] tempMatrix = new double[NumberOfVertices][];
+            tempMatrix = new double[NumberOfVertices][];
+            for (int i = 0; i < NumberOfVertices; i++)
+            {
+                tempMatrix[i] = new double[NumberOfVertices + 1];
+            }
+
             int j = 0;
             double ArraySingleValue = 0;
             Random random = new Random();
-            for (int i = 0; i < _numberOfVertices; i++)
+            for (int i = 0; i < NumberOfVertices; i++)
             {
                 j = i;
-                while (j < _numberOfVertices)
+                while (j < NumberOfVertices)
                 {
                     ArraySingleValue = random.NextDouble();
                     if (i != j)
                     {
-                        if (ArraySingleValue <= _probabilityValue)
+                        if (ArraySingleValue <= ProbabilityValue)
                         {
                             ArraySingleValue = 1;
 
@@ -79,52 +85,58 @@ namespace euler_graph_generator.GraphMethods
                     {
                         ArraySingleValue = 0;
                     }
-                    Matrix[i][j] = ArraySingleValue;
+                    tempMatrix[i][j] = ArraySingleValue;
                     j++;
                 }
 
             }
+            //przekopiowanie jednej połowy macierzy na drugą połowę
+            tempMatrix = FillTheSecondHalfOfTheMatrix(tempMatrix);
+            return tempMatrix;
+        }
+        //wygenerowanie macierzy(UI) na podstawie krawędzi w grafie
+        public  static double[][] GenerateUIMatrix(double[][] matrixUI, Graph graph)
+        {
+            matrixUI = new double[NumberOfVertices][];
+            for (int i = 0; i < NumberOfVertices; i++)
+            {
+                matrixUI[i] = new double[NumberOfVertices + 1];
+            }
+            foreach (var Edge in graph.Edges)
+            {
+                matrixUI[Edge.Source.Index][Edge.Target.Index] = 1;
+                matrixUI[Edge.Target.Index][Edge.Source.Index] = 1;
+            }
+            CalculateMatrixSum(matrixUI);
+            return matrixUI;
         }
 
-        private void FillTheSecondHalfOfTheMatrix()
+        //obliczenie sumy(stopnia) wierzchołków i zapisanie ich w ostatniej kolumnie
+        public static void CalculateMatrixSum(double[][] matrix)
         {
-            for (int i = 0; i < _numberOfVertices; i++)
+            for (int i = 0; i < NumberOfVertices; i++)
+            {
+                double sum = 0;
+                for (int j = 0; j < NumberOfVertices; j++)
+                {
+                    sum += matrix[i][j];
+                }
+                matrix[i][NumberOfVertices] = sum;
+            }
+        }
+
+        //przekopiowanie jednej połowy macierzy na drugą połowę
+        public static double[][] FillTheSecondHalfOfTheMatrix(double[][] matrix)
+        {
+            for (int i = 0; i < NumberOfVertices; i++)
             {
                 for (int j = 0; j < i; j++)
                 {
-                    Matrix[i][j] = Matrix[j][i];
+                    matrix[i][j] = matrix[j][i];
                 }
             }
+            return matrix;
         }
-
-        private void CalculateMatrixSum()
-        {
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                double sum = 0;
-                for (int j = 0; j < _numberOfVertices; j++)
-                {
-                    sum += Matrix[i][j];
-                }
-                Matrix[i][_numberOfVertices] = sum;
-            }
-        }
-
-        private void FillDataTable()
-        {
-            for (int i = 0; i < _numberOfVertices; i++)
-            {
-                var newRow = DataTable.NewRow();
-
-                for (int j = 0; j <= _numberOfVertices; j++)
-                {
-                    newRow[j] = Matrix[i][j];
-                }
-
-                DataTable.Rows.Add(newRow);
-            }
-        }
-
 
     }
 }
