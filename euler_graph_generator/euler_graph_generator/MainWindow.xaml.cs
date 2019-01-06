@@ -79,6 +79,7 @@ namespace euler_graph_generator
                 Napraw_graf.IsEnabled = true;
                 Generuj.IsEnabled = true;
                 message = "po naprawie";
+                vm.SaveToFile(isConnected,isEuler,message);
                 Zapisz.IsEnabled = true;
             }
         }
@@ -130,6 +131,7 @@ namespace euler_graph_generator
                 }
             }
             message = "przed naprawą";
+            vm.SaveToFile(isConnected, isEuler, message);
             Zapisz.IsEnabled = true;
         }
 

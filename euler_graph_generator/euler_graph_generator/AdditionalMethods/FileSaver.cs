@@ -19,8 +19,12 @@ namespace euler_graph_generator.AdditionalMethods
                 string WorkingGroup = "Łukasz Czepielik, Kamil Haręża, Konrad Korzonkiewicz, Bartosz Wróbel \r\n\r\n";
                 
                 File.AppendAllText(filePath, CurrentDate);
-                File.AppendAllText(filePath, School);
-                File.AppendAllText(filePath, WorkingGroup);
+                if(new FileInfo(filePath).Length < 30)
+                {
+                    File.AppendAllText(filePath, School);
+                    File.AppendAllText(filePath, WorkingGroup);
+                }
+              
 
                 
                 string IsConsistent = isConsistent ? "TAK" : "NIE";

@@ -37,7 +37,7 @@ namespace euler_graph_generator.AdditionalMethods
                     return !result;
                 }
             }
-            return result;
+            return false;
         }
 
         //Edge e<-- krawędź którą aktualnie przeszukujemy, int blockedVertex<-- zablokowany wierzchołek, następna krawędź nie może się z nim łączyć

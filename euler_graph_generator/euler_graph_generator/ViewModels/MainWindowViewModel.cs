@@ -348,8 +348,11 @@ namespace euler_graph_generator.ViewModels
         //sprawdzanie czy eulerowski
         public bool CheckIfEuler()
         {
+            VertexMethod.SetVertexNeighbors(_UIMatrix, _existingVertices);
             return EulerChecker.CheckIfEuler(Graph, EdgesToColor, SleepTime);
         }
+
+
 
         //resetowanie danych
         public void ResetData()
