@@ -371,9 +371,9 @@ namespace euler_graph_generator.ViewModels
             NotifyPropertyChanged("DataView");
         }
         //zapis do pliku
-        public void SaveToFile(bool isConsistent, bool isEuler, string message)
+        public void SaveToFile(bool isConsistent, bool isEuler, string message, bool deleteFile)
         {
-            FileSaver.SaveToFile(Graph, _probabilityValue, _UIMatrix, isConsistent, isEuler, message);
+            FileSaver.SaveToFile(Graph, _probabilityValue, _UIMatrix, isConsistent, isEuler, message, deleteFile);
         }
         #endregion
 

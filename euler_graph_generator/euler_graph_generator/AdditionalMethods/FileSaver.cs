@@ -8,12 +8,20 @@ namespace euler_graph_generator.AdditionalMethods
 {
     public static class FileSaver
     {
-        public static void SaveToFile(Graph graph, double probability, double[][] incidenceMatrix, bool isConsistent, bool isEuler, string message)
+        public static void SaveToFile(Graph graph, double probability, double[][] incidenceMatrix, bool isConsistent, bool isEuler, string message,bool deleteFile)
         {
             string filePath = "output.txt";
 
-                //File.WriteAllText(filePath, "");
+            if (deleteFile)
+            {
+                File.WriteAllText(filePath, "");
+            }
+            else
+            {
                 File.AppendAllText(filePath, "");
+            }   
+                
+                
                 string CurrentDate = "Date: " + DateTime.Now + "\r\n";
                 string School = "Akademia Techniczno-Humanistyczna w Bielsku-Białej \r\n";
                 string WorkingGroup = "Łukasz Czepielik, Kamil Haręża, Konrad Korzonkiewicz, Bartosz Wróbel \r\n\r\n";
