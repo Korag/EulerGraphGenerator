@@ -35,7 +35,7 @@ namespace euler_graph_generator
         private bool isEuler = false;
         private string message = "przed naprawą";
         private MainWindowViewModel vm;
-
+        private int repairCounter = 0;
         public MainWindow()
         {
             vm = new MainWindowViewModel();
@@ -47,8 +47,10 @@ namespace euler_graph_generator
         //to się dzieje po skończeniu naprawy
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            
             if (!vm.worker.IsBusy)
             {
+                repairCounter++;
                 isConnected = vm.DepthFirstSearch();
                 if (isConnected)
                 {
@@ -82,7 +84,10 @@ namespace euler_graph_generator
                 Napraw_graf.IsEnabled = true;
                 Generuj.IsEnabled = true;
                 message = "po naprawie";
-                vm.SaveToFile(isConnected,isEuler,message, false);
+                if (repairCounter == 1)
+                {
+                    vm.SaveToFile(isConnected, isEuler, message, false);
+                }
                 Zapisz.IsEnabled = true;
             }
         }
@@ -140,6 +145,7 @@ namespace euler_graph_generator
 
         private void Napraw_Click(object sender, RoutedEventArgs e)
         {
+            repairCounter = 0;
             Zapisz.IsEnabled = false;
             Generuj.IsEnabled = false;
             Napraw_graf.IsEnabled = false;
