@@ -177,12 +177,12 @@
                           Width="150" Height="25" Margin="90,0,103,0" />
                     <StackPanel Margin="18,10,72,0" Orientation="Horizontal" HorizontalAlignment="Center" Width="267">
 
-                        <Label Style="{DynamicResource Label}" Content="Graf eulerowski:" Width="185"/>
+                        <Label Style="{DynamicResource Label}" Content="Graf eulerowski:" Width="190"/>
 
                         <Label  Style="{DynamicResource Label}" Foreground="Red" x:Name="IsEuler" Visibility="Hidden" Content="NIE"/>
                     </StackPanel>
-                    <StackPanel Margin="18,0,112,10" Orientation="Horizontal" HorizontalAlignment="Center"  Width="226">
-                        <Label Style="{DynamicResource Label}" Content="Graf spójny:" />
+                    <StackPanel Margin="18,0,72,0" Orientation="Horizontal" HorizontalAlignment="Center" Width="267">
+                        <Label Style="{DynamicResource Label}" Content="Graf spójny:" Width="190" />
                         <Label Style="{DynamicResource Label}" Foreground="Red" x:Name="IsConnected" Visibility="Hidden" Content="NIE"/>
                     </StackPanel>
 
@@ -212,7 +212,7 @@
 
             <!--Stopka-->
             <!--Label organizacji-->
-            <Label Content="© Vertisio 2018" Height="37" Margin="0,10,43,0" Grid.Row="2" VerticalAlignment="Top" Foreground="#FFF2EDF7" Grid.Column="1" FontWeight="Bold" FontFamily="Bernard MT Condensed" HorizontalAlignment="Right" Width="160" FontSize="24"/>
+            <Label Content="© Vertisio 2018" Height="37" Margin="0,10,10,0" Grid.Row="2" VerticalAlignment="Top" Foreground="#FFF2EDF7" Grid.Column="1" FontWeight="Bold" FontFamily="Bernard MT Condensed" HorizontalAlignment="Right" Width="160" FontSize="24"/>
             <!--Label autorów-->
             <Label Content="© Łukasz Czepielik, Kamil Haręża, Konrad Korzonkiewicz, Bartosz Wróbel" HorizontalAlignment="Left" Height="32" Margin="10,15,0,0" Grid.Row="2" VerticalAlignment="Top" Width="712" Foreground="White" Grid.Column="1" FontFamily="Sitka Text" FontStyle="Italic" FontSize="16"/>
 
