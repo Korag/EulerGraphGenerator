@@ -75,7 +75,8 @@ namespace euler_graph_generator
                     IsEuler.Foreground = Brushes.Red;
                     IsConnected.Content = "NIE";
                     IsConnected.Foreground = Brushes.Red;
-
+                    Generuj_Click(this, null);
+                    vm.worker.RunWorkerAsync();
                     //isConnected = vm.DepthFirstSearch();
                 }
                 Napraw_graf.IsEnabled = true;
