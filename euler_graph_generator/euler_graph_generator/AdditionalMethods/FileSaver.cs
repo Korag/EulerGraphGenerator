@@ -39,7 +39,7 @@ namespace euler_graph_generator.AdditionalMethods
                 
                 
                 string CurrentDate = "Date: " + DateTime.Now + "\r\n";
-                string School = "Akademia Techniczno-Humanistyczna w Bielsku-Białej \r\n";
+                string School = "Akademia Techniczno-Humanistyczna w Bielsku-Białej - 50 lat tradycji \r\n";
                 string WorkingGroup = "Łukasz Czepielik, Kamil Haręża, Konrad Korzonkiewicz, Bartosz Wróbel \r\n\r\n";
                 
                 File.AppendAllText(filePath, CurrentDate);
