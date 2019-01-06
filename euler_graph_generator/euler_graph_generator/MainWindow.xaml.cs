@@ -63,6 +63,8 @@ namespace euler_graph_generator
                         IsEuler.Content = "NIE";
                         IsEuler.Foreground = Brushes.Red;
                         isEuler = vm.CheckIfEuler();
+                        Generuj_Click(this,null);
+                        vm.worker.RunWorkerAsync();
                     }
                     IsConnected.Content = "TAK";
                     IsConnected.Foreground = Brushes.Green;
