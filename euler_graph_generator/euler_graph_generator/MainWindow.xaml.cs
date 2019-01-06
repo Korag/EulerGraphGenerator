@@ -59,6 +59,8 @@ namespace euler_graph_generator
                     {
                         IsEuler.Content = "TAK";
                         IsEuler.Foreground = Brushes.Green;
+                        Napraw_graf.IsEnabled = false;
+                        Euler.IsEnabled = true;
                     }
                     else
                     {
@@ -84,10 +86,6 @@ namespace euler_graph_generator
                 Napraw_graf.IsEnabled = true;
                 Generuj.IsEnabled = true;
                 message = "po naprawie";
-                if (repairCounter == 1)
-                {
-                    vm.SaveToFile(isConnected, isEuler, message, false);
-                }
                 Zapisz.IsEnabled = true;
             }
         }
@@ -101,10 +99,10 @@ namespace euler_graph_generator
             vm.ResetData();
             vm.ReLayoutGraph();
             Reset.IsEnabled = true;
-            if (vm.Graph.Vertices.Count()>1)
+            if (vm.Graph.Vertices.Count()<1)
             {
-                Napraw_graf.IsEnabled = true;
-                Euler.IsEnabled = true;
+                Napraw_graf.IsEnabled = false;
+                Euler.IsEnabled = false;
             }
             
             if(vm.Graph.Vertices.Count()>1)
@@ -122,20 +120,23 @@ namespace euler_graph_generator
                         IsEuler.Content = "TAK";
                         IsEuler.Foreground = Brushes.Green;
                         Napraw_graf.IsEnabled = false;
+                        Euler.IsEnabled = true;
                     }
                     else
                     {
                         IsEuler.Content = "NIE";
                         IsEuler.Foreground = Brushes.Red;
-                        
+                        Napraw_graf.IsEnabled = true;
+
                     }
                 }
                 else
                 {
                     IsConnected.Content = "NIE";
                     IsConnected.Foreground = Brushes.Red;
-                    IsEuler.Content = "NIE";
+                    IsEuler.Content = "NIE";    
                     IsEuler.Foreground = Brushes.Red;
+                    Napraw_graf.IsEnabled = true;
                 }
             }
             message = "przed naprawą";
@@ -171,7 +172,7 @@ namespace euler_graph_generator
         private void Zapisz_Click(object sender, RoutedEventArgs e)
         {
             Zapisz.IsEnabled = false;
-            vm.SaveToFile(isConnected,isEuler,message,true);
+            vm.SaveToFile(isConnected,isEuler,message,false);
         }
 
         private void Euler_Click(object sender, RoutedEventArgs e)
