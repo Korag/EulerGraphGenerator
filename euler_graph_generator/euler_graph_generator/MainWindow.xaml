@@ -9,7 +9,7 @@
         xmlns:converter="clr-namespace:euler_graph_generator.ValueConverters"
         mc:Ignorable="d" 
         Icon="Images\favicon.png"
-        Title="Euler Graph Generator 420BlazeIT" Height="720" Width="1280" MinHeight="360" MinWidth="640">
+        Title="Euler Graph Generator" Height="720" Width="1280" MinHeight="360" MinWidth="640">
     <Window.Resources>
         <converter:EdgeColorConverter x:Key="EdgeColorConverter"/>
         <converter:ConvertPath x:Key="ConvertPath"/>
@@ -59,7 +59,7 @@
             </Style.Triggers>
             <Setter Property="ToolTip" Value="{StaticResource ToolTipContent}"/>
             <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=Edge.EdgeColor, Converter={StaticResource EdgeColorConverter}}"/>
-            
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type graphsharp:EdgeControl}">
@@ -125,7 +125,7 @@
                 <ColumnDefinition Width="193*"/>
             </Grid.ColumnDefinitions>
 
-                <Grid Grid.Column="1" HorizontalAlignment="Left" Height="556" Margin="10,10,0,0" VerticalAlignment="Top" Width="945">
+            <Grid Grid.Column="1" HorizontalAlignment="Left" Height="556" Margin="10,10,0,0" VerticalAlignment="Top" Width="945">
                 <Grid.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                         <GradientStop Color="#FFF3F3EC"/>
@@ -133,7 +133,7 @@
                         <GradientStop Color="White"/>
                     </LinearGradientBrush>
                 </Grid.Background>
-                <Viewbox Name="GraphView" StretchDirection="Both" Stretch="Uniform" Grid.Column="1">
+                <Viewbox Name="GraphView" StretchDirection="Both" Stretch="Uniform" Margin="-10,0,10,0">
                     <vm:GraphLayout x:Name="graphLayout" Margin="100"
 						Graph="{Binding Path=Graph}"
 						LayoutAlgorithmType="{Binding Path=LayoutAlgorithmType, Mode=OneWay}"
@@ -141,9 +141,9 @@
 						HighlightAlgorithmType="Simple" />
                 </Viewbox>
             </Grid>
-         
 
-    <Grid HorizontalAlignment="Left" Height="696" Margin="10,10,0,0" VerticalAlignment="Top" Width="355" Grid.RowSpan="3">
+
+            <Grid HorizontalAlignment="Left" Height="696" Margin="10,10,0,0" VerticalAlignment="Top" Width="355" Grid.RowSpan="3">
                 <Grid.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                         <GradientStop Color="#FFB8CAFB"/>
@@ -168,22 +168,29 @@
                             <GradientStop Color="White"/>
                         </LinearGradientBrush>
                     </Grid.Background>
-                    <DataGrid ItemsSource="{Binding Path=DataView}" AutoGenerateColumns="True"></DataGrid>
+                    <DataGrid ItemsSource="{Binding Path=DataView}" AutoGenerateColumns="True" HorizontalAlignment="Right" Width="316"/>
                 </Grid>
-                <StackPanel Orientation="Vertical"  Margin="0,450,0,0" >
-                    <Label Content="Algorytm generowania grafu" HorizontalAlignment="Center" Style="{DynamicResource Label}" Margin="10"></Label>
+                <StackPanel Orientation="Vertical"  Margin="0,437,0,0" >
+                    <Label Content="Algorytm generowania grafu" HorizontalAlignment="Center" Style="{DynamicResource Label}" Margin="6,10,25,10"/>
                     <ComboBox ItemsSource="{Binding LayoutAlgorithmTypes}"
-                          SelectedItem="{Binding Path=LayoutAlgorithmType, Mode=TwoWay}"
-                          Width="150" Height="25" />
-                    <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Label Style="{DynamicResource Label}" >Graf eulerowski: </Label>
-                        
-                        <Label  Style="{DynamicResource Label}" Foreground="Red" Name="IsEuler" Visibility="Hidden">NIE </Label>
+                          SelectedItem="{Binding LayoutAlgorithmType, Mode=TwoWay}"
+                          Width="150" Height="25" Margin="90,0,103,0" />
+                    <StackPanel Margin="18,10,72,0" Orientation="Horizontal" HorizontalAlignment="Center" Width="267">
+
+                        <Label Style="{DynamicResource Label}" Content="Graf eulerowski:" Width="185"/>
+
+                        <Label  Style="{DynamicResource Label}" Foreground="Red" x:Name="IsEuler" Visibility="Hidden" Content="NIE"/>
                     </StackPanel>
-                    <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Label Style="{DynamicResource Label}" >Graf spójny:</Label>
-                        <Label Style="{DynamicResource Label}" Foreground="Red" Name="IsConnected" Visibility="Hidden">NIE</Label>
+                    <StackPanel Margin="18,0,112,10" Orientation="Horizontal" HorizontalAlignment="Center"  Width="226">
+                        <Label Style="{DynamicResource Label}" Content="Graf spójny:" />
+                        <Label Style="{DynamicResource Label}" Foreground="Red" x:Name="IsConnected" Visibility="Hidden" Content="NIE"/>
                     </StackPanel>
+
+                    <Label Content="Czas pomiędzy wyróżnieniem krawędzi cyklu" Height="39" Style="{DynamicResource Label}" FontSize="16"/>
+                    <Grid Height="37">
+                        <Slider x:Name="sleeptime" Value="{Binding SleepTime}" Height="20" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B" Maximum="20" Minimum="0" Margin="13,5,156,0"  IsSnapToTickEnabled="True" SmallChange="1" LargeChange="2"/>
+                    <TextBox Height="30" Text="{Binding Path=SleepTime}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="204,0,40,0" />
+                    </Grid>
                 </StackPanel>
             </Grid>
 
@@ -196,10 +203,10 @@
                 </Grid.Background>
                 <Button x:Name="Generuj" Content="Generuj graf" HorizontalAlignment="Left" Height="46" Margin="10,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Generuj_Click" />
                 <Button x:Name="Napraw_graf" IsEnabled="False" Content="Napraw graf" HorizontalAlignment="Left" Height="46" Margin="179,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Napraw_Click" />
-                <Button x:Name="Euler" IsEnabled="False" Content="Euler" HorizontalAlignment="Left" Height="46" Margin="350,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Euler_Click"/>
+                <Button x:Name="Euler" IsEnabled="False" Content="Wyznacz cykl Eulera" HorizontalAlignment="Left" Height="46" Margin="350,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Euler_Click"/>
                 <Button x:Name="Reset" IsEnabled="False" Content="Resetuj" HorizontalAlignment="Left" Height="46" Margin="785,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlackButton}" Click="Reset_Click" RenderTransformOrigin="0.499,-0.043" />
                 <Button x:Name="Zapisz" IsEnabled="False" Content="Zapisz do pliku" HorizontalAlignment="Left" Height="46" Margin="630,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Zapisz_Click" RenderTransformOrigin="0.499,-0.043" />
-               
+
             </Grid>
 
 

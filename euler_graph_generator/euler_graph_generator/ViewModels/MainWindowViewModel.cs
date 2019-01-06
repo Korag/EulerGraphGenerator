@@ -67,6 +67,18 @@ namespace euler_graph_generator.ViewModels
 
         }
 
+        private int _sleepTime;
+        public int SleepTime
+        {
+            get { return _sleepTime; }
+            set
+            {
+                _sleepTime = value;
+                NotifyPropertyChanged("SleepTime");
+            }
+
+        }
+
         private string _layoutAlgorithmType;
         public string LayoutAlgorithmType
         {
@@ -336,7 +348,7 @@ namespace euler_graph_generator.ViewModels
         //sprawdzanie czy eulerowski
         public bool CheckIfEuler()
         {
-            return EulerChecker.CheckIfEuler(Graph, EdgesToColor);
+            return EulerChecker.CheckIfEuler(Graph, EdgesToColor, SleepTime);
         }
 
         //resetowanie danych

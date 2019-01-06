@@ -14,7 +14,7 @@ namespace euler_graph_generator.AdditionalMethods
         //trzeba było mówić wcześniej że jest na to algorytm bo namieszałem, ale działa
 
         //sprawdzanie Eulera tutaj zaczynamy
-        public static bool CheckIfEuler(Graph graph, List<Edge> edgesToColor)
+        public static bool CheckIfEuler(Graph graph, List<Edge> edgesToColor, int sleepTime)
         {
             bool result = false;
             //sprawdzanie ścieżki zaczynmy od kazdego wierzchołka aż się uda znaleźć
@@ -33,7 +33,7 @@ namespace euler_graph_generator.AdditionalMethods
                 result = graph.Edges.Any(v => v.IsVisited == false);
                 if (result == false)
                 {
-                    ColorEdges(edgesToColor);
+                    ColorEdges(edgesToColor, sleepTime);
                     return !result;
                 }
             }
@@ -88,14 +88,14 @@ namespace euler_graph_generator.AdditionalMethods
 
             return BlockedVertexIndex;
         }
-        //kolorwaanie
-        private static void ColorEdges(List<Edge> edgesToColor)
+        //kolorowanie
+        private static void ColorEdges(List<Edge> edgesToColor, int sleepTime)
         {
             Task ColorEdgeTask = new Task(() =>
             {
                 foreach (var edge in edgesToColor)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(sleepTime*1000);
                     edge.EdgeColor = Brushes.Red;
 
                 }

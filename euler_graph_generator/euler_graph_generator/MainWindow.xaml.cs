@@ -26,7 +26,7 @@ namespace euler_graph_generator
 
     /* 
      W sumie to tak:
-     1. naprawa czasem nie działa(graf po naprawie jest albo niespójny(to zdarza się najczęściej) alb jest spójny ale nie eulerowski)
+     1. naprawa czasem nie działa(graf po naprawie jest albo niespójny(to zdarza się najczęściej) albo jest spójny ale nie eulerowski)
      2. Przycisk do powtórzenia kolorowania nie blokuje się, więc można parę razy kliknąć
          */
     public partial class MainWindow : Window

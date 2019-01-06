@@ -16,7 +16,7 @@ namespace euler_graph_generator.AdditionalMethods
                 File.AppendAllText(filePath, "");
                 string CurrentDate = "Date: " + DateTime.Now + "\r\n";
                 string School = "Akademia Techniczno-Humanistyczna w Bielsku-Białej \r\n";
-                string WorkingGroup = "Kamil Haręża, Łukasz Czepielik, Bartosz Wróbel, Konrad Korzonkiewicz \r\n\r\n";
+                string WorkingGroup = "Łukasz Czepielik, Kamil Haręża, Konrad Korzonkiewicz, Bartosz Wróbel \r\n\r\n";
                 
                 File.AppendAllText(filePath, CurrentDate);
                 File.AppendAllText(filePath, School);

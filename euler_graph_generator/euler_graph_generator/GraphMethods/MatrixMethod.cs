@@ -25,7 +25,7 @@ namespace euler_graph_generator.GraphMethods
                 }
                 else if (i == -1)
                 {
-                    dataTable.Columns.Add(new DataColumn("Wierzchłoki"));
+                    dataTable.Columns.Add(new DataColumn("Wierzchołki"));
                 }
                 else
                 {
