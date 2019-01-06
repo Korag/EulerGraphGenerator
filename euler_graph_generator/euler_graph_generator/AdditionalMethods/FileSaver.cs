@@ -8,6 +8,9 @@ namespace euler_graph_generator.AdditionalMethods
 {
     public static class FileSaver
     {
+        public static string[] tempData;
+        public static bool firstTime;
+
         public static void SaveToFile(Graph graph, double probability, double[][] incidenceMatrix, bool isConsistent, bool isEuler, string message,bool deleteFile)
         {
             string filePath = "output.txt";
@@ -19,7 +22,20 @@ namespace euler_graph_generator.AdditionalMethods
             else
             {
                 File.AppendAllText(filePath, "");
-            }   
+            }
+            
+
+            if (firstTime == false)
+            {
+                for (int i = 0; i < tempData.Length; i++)
+                {
+                    File.AppendAllText(filePath, tempData[i] + "\r\n");
+                }
+                if (message == "przed naprawą")
+                {
+                    return;
+                }
+            }
                 
                 
                 string CurrentDate = "Date: " + DateTime.Now + "\r\n";
@@ -62,7 +78,13 @@ namespace euler_graph_generator.AdditionalMethods
                 }
 
                 File.AppendAllText(filePath, Matrix);
-            File.AppendAllText(filePath, "\r\n\r\n");
+                File.AppendAllText(filePath, "\r\n\r\n");
+
+            if (firstTime == true)
+            {
+                tempData = File.ReadAllLines(filePath);
+                File.WriteAllText(filePath, "");
+            }
 
         }
     }

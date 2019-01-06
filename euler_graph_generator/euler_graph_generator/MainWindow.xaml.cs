@@ -1,4 +1,5 @@
-﻿using euler_graph_generator.ViewModels;
+﻿using euler_graph_generator.AdditionalMethods;
+using euler_graph_generator.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -140,7 +141,9 @@ namespace euler_graph_generator
                 }
             }
             message = "przed naprawą";
+            FileSaver.firstTime = true;
             vm.SaveToFile(isConnected, isEuler, message,true);
+            FileSaver.firstTime = false;
             Zapisz.IsEnabled = true;
         }
 
