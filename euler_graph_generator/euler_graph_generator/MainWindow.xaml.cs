@@ -1,22 +1,9 @@
 ﻿using euler_graph_generator.AdditionalMethods;
 using euler_graph_generator.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace euler_graph_generator
 {
@@ -40,15 +27,40 @@ namespace euler_graph_generator
         public MainWindow()
         {
             vm = new MainWindowViewModel();
-            this.DataContext = vm;
-            this.WindowState = WindowState.Maximized;
+            DataContext = vm;
+            WindowState = WindowState.Maximized;
             vm.worker.RunWorkerCompleted += worker_RunWorkerCompleted;
             InitializeComponent();
+        }
+        private void EditEulerPathOnUI()
+        {
+            string eulerPathString = "";
+            if (vm.EulerPath.Count >= 1)
+            {
+                for (int i = 0; i < vm.EulerPath.Count; i++)
+                {
+                    if (i != vm.EulerPath.Count - 1)
+                    {
+                        eulerPathString += vm.EulerPath[i] + " => ";
+                    }
+                    else
+                    {
+                        eulerPathString += vm.EulerPath[i];
+                    }
+
+
+                }
+                EulerPath.Foreground = Brushes.Green;
+                EulerPath.Visibility = Visibility.Visible;
+                EulerPath.Text = eulerPathString;
+            }
         }
         //to się dzieje po skończeniu naprawy
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            
+            EulerPath.Foreground = Brushes.Red;
+            EulerPath.Visibility = Visibility.Hidden;
+            EulerPath.Text = "";
             if (!vm.worker.IsBusy)
             {
                 repairCounter++;
@@ -58,7 +70,16 @@ namespace euler_graph_generator
                     isEuler = vm.CheckIfEuler();
                     if (isEuler)
                     {
-                        IsEuler.Content = "TAK";
+                        var list = vm.EulerPath;
+                        if (list[0] != list[list.Count - 1])
+                        {
+                            IsEuler.Content = "Półeulerowski";
+                        }
+                        else
+                        {
+                            IsEuler.Content = "Eulerowski";
+                        }
+                        EditEulerPathOnUI();
                         IsEuler.Foreground = Brushes.Green;
                         Napraw_graf.IsEnabled = false;
                         Euler.IsEnabled = true;
@@ -68,7 +89,7 @@ namespace euler_graph_generator
                         IsEuler.Content = "NIE";
                         IsEuler.Foreground = Brushes.Red;
                         isEuler = vm.CheckIfEuler();
-                        Generuj_Click(this,null);
+                        Generuj_Click(this, null);
                         vm.worker.RunWorkerAsync();
                     }
                     IsConnected.Content = "TAK";
@@ -95,18 +116,22 @@ namespace euler_graph_generator
 
         private void Generuj_Click(object sender, RoutedEventArgs e)
         {
+            EulerPath.Foreground = Brushes.Red;
+            EulerPath.Visibility = Visibility.Hidden;
+            EulerPath.Text = "";
+
             IsEuler.Visibility = Visibility.Hidden;
             IsConnected.Visibility = Visibility.Hidden;
             vm.ResetData();
             vm.ReLayoutGraph();
             Reset.IsEnabled = true;
-            if (vm.Graph.Vertices.Count()<1)
+            if (vm.Graph.Vertices.Count() < 1)
             {
                 Napraw_graf.IsEnabled = false;
                 Euler.IsEnabled = false;
             }
-            
-            if(vm.Graph.Vertices.Count()>1)
+
+            if (vm.Graph.Vertices.Count() > 1)
             {
                 IsEuler.Visibility = Visibility.Visible;
                 IsConnected.Visibility = Visibility.Visible;
@@ -118,7 +143,16 @@ namespace euler_graph_generator
                     isEuler = vm.CheckIfEuler();
                     if (isEuler)
                     {
-                        IsEuler.Content = "TAK";
+                        var list = vm.EulerPath;
+                        if (list[0] != list[list.Count - 1])
+                        {
+                            IsEuler.Content = "Półeulerowski";
+                        }
+                        else
+                        {
+                            IsEuler.Content = "Eulerowski";
+                        }
+                        EditEulerPathOnUI();
                         IsEuler.Foreground = Brushes.Green;
                         Napraw_graf.IsEnabled = false;
                         Euler.IsEnabled = true;
@@ -135,14 +169,14 @@ namespace euler_graph_generator
                 {
                     IsConnected.Content = "NIE";
                     IsConnected.Foreground = Brushes.Red;
-                    IsEuler.Content = "NIE";    
+                    IsEuler.Content = "NIE";
                     IsEuler.Foreground = Brushes.Red;
                     Napraw_graf.IsEnabled = true;
                 }
             }
             message = "przed naprawą";
             FileSaver.firstTime = true;
-            vm.SaveToFile(isConnected, isEuler, message,true);
+            vm.SaveToFile(isConnected, isEuler, message, true);
             FileSaver.firstTime = false;
             Zapisz.IsEnabled = true;
         }
@@ -154,11 +188,14 @@ namespace euler_graph_generator
             Generuj.IsEnabled = false;
             Napraw_graf.IsEnabled = false;
             vm.worker.RunWorkerAsync();
-            
+
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
+            EulerPath.Foreground = Brushes.Red;
+            EulerPath.Visibility = Visibility.Hidden;
+            EulerPath.Text = "";
             Generuj.IsEnabled = true;
             Reset.IsEnabled = false;
             Euler.IsEnabled = false;
@@ -175,7 +212,7 @@ namespace euler_graph_generator
         private void Zapisz_Click(object sender, RoutedEventArgs e)
         {
             Zapisz.IsEnabled = false;
-            vm.SaveToFile(isConnected,isEuler,message,false);
+            vm.SaveToFile(isConnected, isEuler, message, false);
         }
 
         private void Euler_Click(object sender, RoutedEventArgs e)
@@ -190,9 +227,18 @@ namespace euler_graph_generator
                     IsConnected.Foreground = Brushes.Green;
                     if (vm.CheckIfEuler())
                     {
-                        IsEuler.Content = "TAK";
+                        var list = vm.EulerPath;
+                        if (list[0] != list[list.Count - 1])
+                        {
+                            IsEuler.Content = "Półeulerowski";
+                        }
+                        else
+                        {
+                            IsEuler.Content = "Eulerowski";
+                        }
+                        EditEulerPathOnUI();
                         IsEuler.Foreground = Brushes.Green;
-                       
+
                     }
                     else
                     {

@@ -7,15 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Media;
 
 namespace euler_graph_generator.ViewModels
 {
@@ -33,15 +26,18 @@ namespace euler_graph_generator.ViewModels
         private double[][] _matrix;//macierz incydencji do obliczeń
         private double[][] _UIMatrix;//macierz do UI
         private List<Vertex> _existingVertices;//lista przechowująca wierzchołki
+
+        private object locker = new object();
         #endregion
 
         #region Public Data
+        public List<int> EulerPath = new List<int>();
         public DataTable DataTable { get; set; } = new DataTable();//macierz w UI
         public DataView DataView { get; private set; }//macierz w UI
         public List<string> LayoutAlgorithmTypes { get; } = new List<string>();//lista z algorytmami rysowania grafów
         public List<Edge> EdgesToColor { get; set; } = new List<Edge>();//Lista która zapewnia prawidłową kolejność rysowania ścieżki/cyklu Eulera
         public readonly BackgroundWorker worker = new BackgroundWorker();//to służy do wykonywania naprawy grafu w odzielnym wątku
-        
+
 
         private int _numberOfVertices;
         public int NumberOfVertices
@@ -140,7 +136,7 @@ namespace euler_graph_generator.ViewModels
 
         private void RefreshMatrixUi()
         {
-            _UIMatrix =  MatrixMethod.GenerateUIMatrix(_UIMatrix, Graph);
+            _UIMatrix = MatrixMethod.GenerateUIMatrix(_UIMatrix, Graph);
             DataTable = new DataTable();
             MatrixMethod.SetMatrixColumns(DataTable);
             MatrixMethod.FillDataTable(_UIMatrix, DataTable);
@@ -159,9 +155,11 @@ namespace euler_graph_generator.ViewModels
             ////aktualizacja macierzy
 
             _matrix = MatrixMethod.FillTheSecondHalfOfTheMatrix(_matrix);
+            //EdgeMethod.RemoveAllGraphEdges(Graph);
 
-            EdgeMethod.GenerateEdges(_matrix, _existingVertices, Graph);
+            Graph = EdgeMethod.GenerateEdges(_matrix, _existingVertices, Graph);
 
+            // int edgeCounter = Graph.Edges.Count();
             ////aktualizacja tabeli
             VertexMethod.CalculateTheSum(_matrix, _existingVertices);
             VertexMethod.SetVertexNeighbors(_matrix, _existingVertices);
@@ -172,6 +170,7 @@ namespace euler_graph_generator.ViewModels
         //metoda naprawy grafów autorem jest Owner, zrobiłem delikatny tunining-> mniej się sypie xd
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            var workerGraph = Graph;
             var selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
             if (Graph.Edges.Count() >= 1)
             {
@@ -194,10 +193,8 @@ namespace euler_graph_generator.ViewModels
                         }
 
                         selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
-
-                        if (selector[1].Count == 0 && selector[0].Count > 0)
-                        {
-                            var start = selector[0].Pop();
+                        //(selector[1].Count == 0 && selector[0].Count > 0)
+                        /*                             var start = selector[0].Pop();
                             var end = selector[2].Pop();
                             _matrix[start.Index][end.Index] = 1;
                             _matrix[end.Index][start.Index] = 1;
@@ -208,7 +205,21 @@ namespace euler_graph_generator.ViewModels
                                 _matrix[end.Index][end.Neighbors[0].Index] = 0;
                                 _matrix[end.Neighbors[0].Index][end.Index] = 0;
                                 Report();
-                            }
+                            }*/
+
+                        if (selector[1].Count == 0 && selector[0].Count > 0)
+                        {
+                            var start = selector[0].Pop();
+                            var end = selector[2].Pop();
+                            _matrix[start.Index][end.Index] = 1;
+                            _matrix[end.Index][start.Index] = 1;
+                            _matrix[start.Index][end.Neighbors[0].Index] = 1;
+                            _matrix[end.Neighbors[0].Index][start.Index] = 1;
+                            _matrix[end.Index][end.Neighbors[0].Index] = 0;
+                            _matrix[end.Neighbors[0].Index][end.Index] = 0;
+                            //EdgeMethod.RemoveTheEdge(Graph, end.Index, end.Neighbors[0].Index);
+
+
                             Report();
                         }
                         Report();
@@ -219,13 +230,14 @@ namespace euler_graph_generator.ViewModels
                         List<Vertex> connection = new List<Vertex>();
                         connection.Add(selector[1].Pop());
                         connection.Add(selector[1].Pop());
-
+                        Report();
                         if (_matrix[connection[0].Index][connection[1].Index] == 1)
                         {
                             if (connection[0].Neighbors.Count == 1 && connection[1].Neighbors.Count == 1)
                             {
                                 _matrix[connection[0].Index][connection[1].Index] = 0;
                                 _matrix[connection[1].Index][connection[0].Index] = 0;
+                                //EdgeMethod.RemoveTheEdge(Graph, connection[0].Index, connection[1].Index);
                                 Report();
                             }
                             else
@@ -236,18 +248,21 @@ namespace euler_graph_generator.ViewModels
 
                                     _matrix[connection[0].Index][helpList[0].Index] = 0;
                                     _matrix[helpList[0].Index][connection[0].Index] = 0;
+                                    //EdgeMethod.RemoveTheEdge(Graph, connection[0].Index, helpList[0].Index);
                                     Report();
                                 }
                                 else
                                 {
                                     var helpList = connection[1].Neighbors.Where(v => v.Index != connection[0].Index).ToList();
 
-                                    if (helpList.Count > 0 && connection.Count > 0)
-                                    {
-                                        _matrix[connection[1].Index][helpList[0].Index] = 0;
-                                        _matrix[helpList[0].Index][connection[1].Index] = 0;
-                                        Report();
-                                    }
+                                    //if (helpList.Count > 0 && connection.Count > 0)
+                                    //{
+                                    _matrix[connection[1].Index][helpList[0].Index] = 0;
+                                    _matrix[helpList[0].Index][connection[1].Index] = 0;
+                                    //EdgeMethod.RemoveTheEdge(Graph, connection[1].Index, helpList[0].Index);
+
+                                    Report();
+                                    //}
 
                                 }
                             }
@@ -260,13 +275,14 @@ namespace euler_graph_generator.ViewModels
                             Report();
                         }
                         Report();
+                        selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
                     }
                     selector = VertexMethod.GetVertexDegreeInfo(_matrix, _existingVertices);
-                    if (selector[1].Count == 2)
-                    {
-                        Report();
-                        break;
-                    }
+                    //if (selector[1].Count == 2)
+                    //{
+                    //    Report();
+                    //    break;
+                    //}
                     Report();
                 }
             }
@@ -301,7 +317,10 @@ namespace euler_graph_generator.ViewModels
         }
         private void Report()
         {
+
             worker.ReportProgress(0);
+
+
             Thread.Sleep(500);
         }
 
@@ -336,7 +355,7 @@ namespace euler_graph_generator.ViewModels
 
             UndirectedGraph = new UndirectedBidirectionalGraph<Vertex, Edge>(Graph);//coś jak canvas
 
-            
+
             RefreshMatrixUi();//odświeżenie UI
         }
 
@@ -349,7 +368,7 @@ namespace euler_graph_generator.ViewModels
         public bool CheckIfEuler()
         {
             VertexMethod.SetVertexNeighbors(_UIMatrix, _existingVertices);
-            return EulerChecker.CheckIfEuler(Graph, EdgesToColor, SleepTime);
+            return EulerChecker.CheckIfEuler(Graph, EdgesToColor, SleepTime, ref EulerPath);
         }
 
 
@@ -373,7 +392,7 @@ namespace euler_graph_generator.ViewModels
         //zapis do pliku
         public void SaveToFile(bool isConsistent, bool isEuler, string message, bool deleteFile)
         {
-            FileSaver.SaveToFile(Graph, _probabilityValue, _UIMatrix, isConsistent, isEuler, message, deleteFile);
+            FileSaver.SaveToFile(Graph, _probabilityValue, _UIMatrix, isConsistent, isEuler, message, deleteFile, EulerPath);
         }
         #endregion
 

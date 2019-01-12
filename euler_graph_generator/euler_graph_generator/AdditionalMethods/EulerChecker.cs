@@ -1,8 +1,6 @@
 ﻿using euler_graph_generator.GraphElements;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -14,7 +12,7 @@ namespace euler_graph_generator.AdditionalMethods
         //trzeba było mówić wcześniej że jest na to algorytm bo namieszałem, ale działa
 
         //sprawdzanie Eulera tutaj zaczynamy
-        public static bool CheckIfEuler(Graph graph, List<Edge> edgesToColor, int sleepTime)
+        public static bool CheckIfEuler(Graph graph, List<Edge> edgesToColor, int sleepTime, ref List<int> EulerPath)
         {
             bool result = false;
             //sprawdzanie ścieżki zaczynmy od kazdego wierzchołka aż się uda znaleźć
@@ -27,13 +25,14 @@ namespace euler_graph_generator.AdditionalMethods
                     Edgee.EdgeColor = Brushes.LimeGreen;
                     Edgee.IsVisited = false;
                 }
-                
-                VisitEdge(Edge, -1, edgesToColor,graph);
+                EulerPath = new List<int>();
+                VisitEdge(Edge, -1, edgesToColor, graph);
                 //jeśli uda się znaleźć ścieżkę eulera to kończymy przeszukiwanie
                 result = graph.Edges.Any(v => v.IsVisited == false);
                 if (result == false)
                 {
                     ColorEdges(edgesToColor, sleepTime);
+                    GenerateEulerPathList(edgesToColor, ref EulerPath);
                     return !result;
                 }
             }
@@ -45,7 +44,12 @@ namespace euler_graph_generator.AdditionalMethods
         //Graph graph<- stąd pobieram wszystkie potrzebne dane
         private static void VisitEdge(Edge e, int blockedVertex, List<Edge> edgesToColor, Graph graph)
         {
-            edgesToColor.Add(e);
+
+            if (blockedVertex == -1)
+            {
+                edgesToColor.Add(e);
+            }
+
             e.IsVisited = true;
             var from = e.Source;
             var to = e.Target;
@@ -59,6 +63,8 @@ namespace euler_graph_generator.AdditionalMethods
                 nextEdge.IsVisited = true;
                 edgesToColor.Add(nextEdge);
                 indexVertex = CheckVertexIndex(e, nextEdge);//wierzchołkowi o tym inedexie sprawdzamy stopień
+
+
             }
             //tutaj sprawdzamy czy wierzchołek jest 1 stopnia, jeśli tak to nie ma z niego powrotu
             var vertex = graph.Vertices.Where(x => x.Index == indexVertex).FirstOrDefault();
@@ -84,7 +90,9 @@ namespace euler_graph_generator.AdditionalMethods
             .Where(g => g.Count() > 1)
             .Select(g => g.Key);
             foreach (var d in duplicates)
+            {
                 BlockedVertexIndex = d;
+            }
 
             return BlockedVertexIndex;
         }
@@ -95,7 +103,7 @@ namespace euler_graph_generator.AdditionalMethods
             {
                 foreach (var edge in edgesToColor)
                 {
-                    Thread.Sleep(sleepTime*1000);
+                    Thread.Sleep(sleepTime * 1000);
                     edge.EdgeColor = Brushes.Red;
 
                 }
@@ -117,6 +125,55 @@ namespace euler_graph_generator.AdditionalMethods
             {
                 return next.Target.Index;
             }
+        }
+
+        private static void GenerateEulerPathList(List<Edge> edgesToColor, ref List<int> EulerPath)
+        {
+            List<int> prev = new List<int>();
+            List<int> next = new List<int>();
+
+            for (int i = 0; i < edgesToColor.Count - 1; i++)
+            {
+                prev.Add(edgesToColor[i].Source.Index);
+                prev.Add(edgesToColor[i].Target.Index);
+                next.Add(edgesToColor[i + 1].Source.Index);
+                next.Add(edgesToColor[i + 1].Target.Index);
+
+                for (int x = 0; x < 2; x++)
+                {
+                    if (!next.Contains(prev[x]))
+                    {
+                        EulerPath.Add(prev[x] + 1);
+                    }
+                }
+                prev = new List<int>();
+                next = new List<int>();
+
+            }
+            prev = new List<int>();
+            next = new List<int>();
+            prev.Add(edgesToColor[edgesToColor.Count - 2].Source.Index);
+            prev.Add(edgesToColor[edgesToColor.Count - 2].Target.Index);
+
+            next.Add(edgesToColor[edgesToColor.Count - 1].Source.Index);
+            next.Add(edgesToColor[edgesToColor.Count - 1].Target.Index);
+            for (int x = 0; x < 2; x++)
+            {
+                if (prev.Contains(next[x]))
+                {
+                    EulerPath.Add(next[x] + 1);
+                }
+            }
+            for (int x = 0; x < 2; x++)
+            {
+                if (!prev.Contains(next[x]))
+                {
+                    EulerPath.Add(next[x] + 1);
+                }
+            }
+            //EulerPath.Add
+
+
         }
     }
 }
