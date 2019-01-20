@@ -11,7 +11,7 @@ namespace euler_graph_generator.AdditionalMethods
         public static string[] tempData;
         public static bool firstTime;
 
-        public static void SaveToFile(Graph graph, double probability, double[][] incidenceMatrix, bool isConsistent, bool isEuler, string message, bool deleteFile, List<int> eulerPath)
+        public static void SaveToFile(Graph graph, double probability, double[][] incidenceMatrix, bool isConsistent, string isEuler, string message, bool deleteFile, List<int> eulerPath)
         {
             string filePath = "output.txt";
 
@@ -52,14 +52,15 @@ namespace euler_graph_generator.AdditionalMethods
 
 
             string IsConsistent = isConsistent ? "TAK" : "NIE";
-            string IsEuler = isEuler ? "TAK" : "NIE";
 
             File.AppendAllText(filePath, "Stan grafu: " + message + "\r\n");
             File.AppendAllText(filePath, "Ilość wierzchołków w grafie: " + graph.Vertices.Count() + "\r\n");
             File.AppendAllText(filePath, "Ilość krawędzi w grafie: " + graph.Edges.Count() + "\r\n");
             File.AppendAllText(filePath, "Prawdopodobieństwo utworzenia krawędzi: " + probability + "\r\n");
             File.AppendAllText(filePath, "Graf Spójny: " + IsConsistent + "\r\n");
-            File.AppendAllText(filePath, "Graf Eulerowski: " + IsEuler + "\r\n\r\n");
+            File.AppendAllText(filePath, "Graf Eulerowski: " + isEuler + "\r\n\r\n");
+
+
 
 
             File.AppendAllText(filePath, "Macierz incydencji " + message + ": \r\n\r\n");

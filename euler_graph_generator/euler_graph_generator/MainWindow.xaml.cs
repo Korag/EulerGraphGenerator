@@ -176,7 +176,7 @@ namespace euler_graph_generator
             }
             message = "przed naprawą";
             FileSaver.firstTime = true;
-            vm.SaveToFile(isConnected, isEuler, message, true);
+            vm.SaveToFile(isConnected, IsEuler.Content.ToString(), message, true);
             FileSaver.firstTime = false;
             Zapisz.IsEnabled = true;
         }
@@ -212,7 +212,7 @@ namespace euler_graph_generator
         private void Zapisz_Click(object sender, RoutedEventArgs e)
         {
             Zapisz.IsEnabled = false;
-            vm.SaveToFile(isConnected, isEuler, message, false);
+            vm.SaveToFile(isConnected, IsEuler.Content.ToString(), message, false);
         }
 
         private void Euler_Click(object sender, RoutedEventArgs e)
