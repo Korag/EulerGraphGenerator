@@ -71,7 +71,13 @@ namespace euler_graph_generator
                     if (isEuler)
                     {
                         var list = vm.EulerPath;
-                        if (list[0] != list[list.Count - 1])
+                        bool result = true;
+                        if (list.Count > 1)
+                        {
+                            result = list[0] != list[list.Count - 1];
+                        }
+
+                        if (result)
                         {
                             IsEuler.Content = "Półeulerowski";
                         }
@@ -144,7 +150,13 @@ namespace euler_graph_generator
                     if (isEuler)
                     {
                         var list = vm.EulerPath;
-                        if (list[0] != list[list.Count - 1])
+                        bool result = true;
+                        if (list.Count > 1)
+                        {
+                            result = list[0] != list[list.Count - 1];
+                        }
+
+                        if (result)
                         {
                             IsEuler.Content = "Półeulerowski";
                         }
@@ -228,7 +240,13 @@ namespace euler_graph_generator
                     if (vm.CheckIfEuler())
                     {
                         var list = vm.EulerPath;
-                        if (list[0] != list[list.Count - 1])
+                        bool result = true;
+                        if (list.Count > 1)
+                        {
+                            result = list[0] != list[list.Count - 1];
+                        }
+
+                        if (result)
                         {
                             IsEuler.Content = "Półeulerowski";
                         }

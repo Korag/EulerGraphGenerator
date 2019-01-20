@@ -152,25 +152,29 @@ namespace euler_graph_generator.AdditionalMethods
             }
             prev = new List<int>();
             next = new List<int>();
-            prev.Add(edgesToColor[edgesToColor.Count - 2].Source.Index);
-            prev.Add(edgesToColor[edgesToColor.Count - 2].Target.Index);
+            if (edgesToColor.Count > 1)
+            {
+                prev.Add(edgesToColor[edgesToColor.Count - 2].Source.Index);
+                prev.Add(edgesToColor[edgesToColor.Count - 2].Target.Index);
 
-            next.Add(edgesToColor[edgesToColor.Count - 1].Source.Index);
-            next.Add(edgesToColor[edgesToColor.Count - 1].Target.Index);
-            for (int x = 0; x < 2; x++)
-            {
-                if (prev.Contains(next[x]))
+                next.Add(edgesToColor[edgesToColor.Count - 1].Source.Index);
+                next.Add(edgesToColor[edgesToColor.Count - 1].Target.Index);
+                for (int x = 0; x < 2; x++)
                 {
-                    EulerPath.Add(next[x] + 1);
+                    if (prev.Contains(next[x]))
+                    {
+                        EulerPath.Add(next[x] + 1);
+                    }
+                }
+                for (int x = 0; x < 2; x++)
+                {
+                    if (!prev.Contains(next[x]))
+                    {
+                        EulerPath.Add(next[x] + 1);
+                    }
                 }
             }
-            for (int x = 0; x < 2; x++)
-            {
-                if (!prev.Contains(next[x]))
-                {
-                    EulerPath.Add(next[x] + 1);
-                }
-            }
+
             //EulerPath.Add
 
 
