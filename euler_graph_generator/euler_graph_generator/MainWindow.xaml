@@ -150,15 +150,15 @@
                         <GradientStop Color="#FFD0D5DC" Offset="1"/>
                     </LinearGradientBrush>
                 </Grid.Background>
-                <Label Content="Liczba wierzchołków" Height="49"  Margin="59,10,60,637" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
-                <TextBox HorizontalAlignment="Left"  Height="30" Margin="203,59,0,0"  Text="{Binding Path=NumberOfVertices}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                <Slider x:Name="liczbaWierzcholkow" HorizontalAlignment="Left" Value="{Binding Path=NumberOfVertices}" Height="30" Margin="12,64,0,0" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B" Maximum="50" Minimum="0"/>
+                <Label Content="Liczba wierzchołków"  Margin="84,10,105,650" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
+                <TextBox HorizontalAlignment="Left"  Height="30" Margin="218,59,0,0"  Text="{Binding Path=NumberOfVertices}" VerticalAlignment="Top" Width="115" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                <Slider x:Name="liczbaWierzcholkow" HorizontalAlignment="Left" Value="{Binding Path=NumberOfVertices}" Height="30" Margin="20,64,0,0" VerticalAlignment="Top" Width="193" Foreground="#FF811B1B" Maximum="50" Minimum="0"/>
 
-                <Label Content="Prawdopodobieństwo" Height="49"  Margin="59,104,60,543" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
-                <TextBox HorizontalAlignment="Left"  Height="30" Margin="203,144,0,0"  Text="{Binding Path=ProbabilityValue}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.496,3.002"/>
-                <Slider x:Name="prawdopodobienstwo" HorizontalAlignment="Left" Value="{Binding Path=ProbabilityValue}" Height="30" Margin="12,149,0,0" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B" Maximum="1" Minimum="0"/>
+                <Label Content="Prawdopodobieństwo"  Margin="81,105,105,557" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
+                <TextBox HorizontalAlignment="Left"  Height="30" Margin="218,144,0,0"  Text="{Binding Path=ProbabilityValue}" VerticalAlignment="Top" Width="115" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.496,3.002"/>
+                <Slider x:Name="prawdopodobienstwo" HorizontalAlignment="Left" Value="{Binding Path=ProbabilityValue}" Height="30" Margin="20,149,0,0" VerticalAlignment="Top" Width="193" Foreground="#FF811B1B" Maximum="1" Minimum="0"/>
 
-                <Label Content="Macierz incydencji" Height="49"  Margin="72,180,79,449" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
+                <Label Content="Macierz incydencji"  Margin="91,190,113,468" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
 
                 <Grid HorizontalAlignment="Left" Height="180" Margin="17,220,0,0" VerticalAlignment="Top" Width="316">
                     <Grid.Background>
@@ -168,7 +168,7 @@
                             <GradientStop Color="White"/>
                         </LinearGradientBrush>
                     </Grid.Background>
-                    <DataGrid ItemsSource="{Binding Path=DataView}" AutoGenerateColumns="True" HorizontalAlignment="Right" Width="316"/>
+                    <DataGrid ItemsSource="{Binding Path=DataView}" AutoGenerateColumns="True"/>
                 </Grid>
                 <StackPanel Orientation="Vertical"  Margin="0,400,0,0" >
                     <Label Content="Algorytm generowania grafu" HorizontalAlignment="Center" Style="{DynamicResource Label}" Margin="6,0,25,10" FontSize="17"/>
@@ -188,17 +188,17 @@
                     <StackPanel Margin="18,0,72,0" Orientation="Vertical" HorizontalAlignment="Left" >
                         <Label Style="{DynamicResource Label}" Content="Ścieżka/cykl eulera: "  FontSize="15"/>
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                        <TextBlock 
+                            <TextBlock 
          TextWrapping="Wrap" Foreground="Red" Visibility="Hidden" Text="Brak ścieżki/cyklu eulera" FontSize="15" Name="EulerPath" Height="30"/>
                         </ScrollViewer>
                     </StackPanel>
 
-                    
+
                     <Label Content="Czas pomiędzy wyróżnieniem krawędzi cyklu" Height="39" Style="{DynamicResource Label}" FontSize="16"/>
-                        
+
                     <Grid>
                         <Slider x:Name="sleeptime" Value="{Binding SleepTime}" Height="30" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B" Maximum="20" Minimum="0" Margin="13,0,156,0"  IsSnapToTickEnabled="True" SmallChange="1" LargeChange="2"/>
-                    <TextBox Height="30" Text="{Binding Path=SleepTime}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="150,0,40,0" />
+                        <TextBox Height="30" Text="{Binding Path=SleepTime}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="150,0,40,0" />
                     </Grid>
                 </StackPanel>
             </Grid>
