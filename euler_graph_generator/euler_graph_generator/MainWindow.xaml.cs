@@ -21,7 +21,7 @@ namespace euler_graph_generator
     {
         private bool isConnected = false;
         private bool isEuler = false;
-        private string message = "przed naprawą";
+        private string message = "before repair";
         private MainWindowViewModel vm;
         private int repairCounter = 0;
         public MainWindow()
@@ -71,13 +71,19 @@ namespace euler_graph_generator
                     if (isEuler)
                     {
                         var list = vm.EulerPath;
-                        if (list[0] != list[list.Count - 1])
+                        bool result = true;
+
+                        if (list.Count > 1)
                         {
-                            IsEuler.Content = "Półeulerowski";
+                            result = list[0] != list[list.Count - 1];
+                        }
+                        if (result)
+                        {
+                            IsEuler.Content = "Half-Eulerian";
                         }
                         else
                         {
-                            IsEuler.Content = "Eulerowski";
+                            IsEuler.Content = "Eulerian";
                         }
                         EditEulerPathOnUI();
                         IsEuler.Foreground = Brushes.Green;
@@ -86,20 +92,20 @@ namespace euler_graph_generator
                     }
                     else
                     {
-                        IsEuler.Content = "NIE";
+                        IsEuler.Content = "NO";
                         IsEuler.Foreground = Brushes.Red;
                         isEuler = vm.CheckIfEuler();
                         Generuj_Click(this, null);
                         vm.worker.RunWorkerAsync();
                     }
-                    IsConnected.Content = "TAK";
+                    IsConnected.Content = "YES";
                     IsConnected.Foreground = Brushes.Green;
                 }
                 else
                 {
-                    IsEuler.Content = "NIE";
+                    IsEuler.Content = "NO";
                     IsEuler.Foreground = Brushes.Red;
-                    IsConnected.Content = "NIE";
+                    IsConnected.Content = "NO";
                     IsConnected.Foreground = Brushes.Red;
                     Generuj_Click(this, null);
                     vm.worker.RunWorkerAsync();
@@ -107,7 +113,7 @@ namespace euler_graph_generator
                 }
                 Napraw_graf.IsEnabled = true;
                 Generuj.IsEnabled = true;
-                message = "po naprawie";
+                message = "after repair";
                 Zapisz.IsEnabled = true;
             }
         }
@@ -138,19 +144,24 @@ namespace euler_graph_generator
                 isConnected = vm.DepthFirstSearch();
                 if (isConnected)
                 {
-                    IsConnected.Content = "TAK";
+                    IsConnected.Content = "YES";
                     IsConnected.Foreground = Brushes.Green;
                     isEuler = vm.CheckIfEuler();
                     if (isEuler)
                     {
                         var list = vm.EulerPath;
-                        if (list[0] != list[list.Count - 1])
+                        bool result = true;
+                        if (list.Count > 1)
                         {
-                            IsEuler.Content = "Półeulerowski";
+                            result = list[0] != list[list.Count - 1];
+                        }
+                        if (result)
+                        {
+                            IsEuler.Content = "Half-Eulerian";
                         }
                         else
                         {
-                            IsEuler.Content = "Eulerowski";
+                            IsEuler.Content = "Eulerian";
                         }
                         EditEulerPathOnUI();
                         IsEuler.Foreground = Brushes.Green;
@@ -159,7 +170,7 @@ namespace euler_graph_generator
                     }
                     else
                     {
-                        IsEuler.Content = "NIE";
+                        IsEuler.Content = "NO";
                         IsEuler.Foreground = Brushes.Red;
                         Napraw_graf.IsEnabled = true;
 
@@ -167,16 +178,16 @@ namespace euler_graph_generator
                 }
                 else
                 {
-                    IsConnected.Content = "NIE";
+                    IsConnected.Content = "NO";
                     IsConnected.Foreground = Brushes.Red;
-                    IsEuler.Content = "NIE";
+                    IsEuler.Content = "NO";
                     IsEuler.Foreground = Brushes.Red;
                     Napraw_graf.IsEnabled = true;
                 }
             }
-            message = "przed naprawą";
+            message = "before repair";
             FileSaver.firstTime = true;
-            vm.SaveToFile(isConnected, isEuler, message, true);
+            vm.SaveToFile(isConnected, IsEuler.Content.ToString(), message, true);
             FileSaver.firstTime = false;
             Zapisz.IsEnabled = true;
         }
@@ -212,7 +223,7 @@ namespace euler_graph_generator
         private void Zapisz_Click(object sender, RoutedEventArgs e)
         {
             Zapisz.IsEnabled = false;
-            vm.SaveToFile(isConnected, isEuler, message, false);
+            vm.SaveToFile(isConnected, IsEuler.Content.ToString(), message, false);
         }
 
         private void Euler_Click(object sender, RoutedEventArgs e)
@@ -223,18 +234,23 @@ namespace euler_graph_generator
                 IsConnected.Visibility = Visibility.Visible;
                 if (vm.DepthFirstSearch())
                 {
-                    IsConnected.Content = "TAK";
+                    IsConnected.Content = "YES";
                     IsConnected.Foreground = Brushes.Green;
                     if (vm.CheckIfEuler())
                     {
                         var list = vm.EulerPath;
-                        if (list[0] != list[list.Count - 1])
+                        bool result = true;
+                        if (list.Count > 1)
                         {
-                            IsEuler.Content = "Półeulerowski";
+                            result = list[0] != list[list.Count - 1];
+                        }
+                        if (result)
+                        {
+                            IsEuler.Content = "Half - Eulerian";
                         }
                         else
                         {
-                            IsEuler.Content = "Eulerowski";
+                            IsEuler.Content = "Eulerian";
                         }
                         EditEulerPathOnUI();
                         IsEuler.Foreground = Brushes.Green;
@@ -242,16 +258,16 @@ namespace euler_graph_generator
                     }
                     else
                     {
-                        IsEuler.Content = "NIE";
+                        IsEuler.Content = "NO";
                         IsEuler.Foreground = Brushes.Red;
 
                     }
                 }
                 else
                 {
-                    IsConnected.Content = "NIE";
+                    IsConnected.Content = "NO";
                     IsConnected.Foreground = Brushes.Red;
-                    IsEuler.Content = "NIE";
+                    IsEuler.Content = "NO";
                     IsEuler.Foreground = Brushes.Red;
                 }
             }

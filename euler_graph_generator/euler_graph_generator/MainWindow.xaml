@@ -150,15 +150,15 @@
                         <GradientStop Color="#FFD0D5DC" Offset="1"/>
                     </LinearGradientBrush>
                 </Grid.Background>
-                <Label Content="Liczba wierzchołków"  Margin="84,10,105,650" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
+                <Label Content="Number of vertices"  Margin="96,10,112,650" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
                 <TextBox HorizontalAlignment="Left"  Height="30" Margin="218,59,0,0"  Text="{Binding Path=NumberOfVertices}" VerticalAlignment="Top" Width="115" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                 <Slider x:Name="liczbaWierzcholkow" HorizontalAlignment="Left" Value="{Binding Path=NumberOfVertices}" Height="30" Margin="20,64,0,0" VerticalAlignment="Top" Width="193" Foreground="#FF811B1B" Maximum="50" Minimum="0"/>
 
-                <Label Content="Prawdopodobieństwo"  Margin="81,105,105,557" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
+                <Label Content="Plausibility"  Margin="125,99,138,563" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
                 <TextBox HorizontalAlignment="Left"  Height="30" Margin="218,144,0,0"  Text="{Binding Path=ProbabilityValue}" VerticalAlignment="Top" Width="115" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.496,3.002"/>
                 <Slider x:Name="prawdopodobienstwo" HorizontalAlignment="Left" Value="{Binding Path=ProbabilityValue}" Height="30" Margin="20,149,0,0" VerticalAlignment="Top" Width="193" Foreground="#FF811B1B" Maximum="1" Minimum="0"/>
 
-                <Label Content="Macierz incydencji"  Margin="91,190,113,468" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
+                <Label Content="Incident matrix"  Margin="109,184,95,474" Style="{DynamicResource Label}" RenderTransformOrigin="0.306,0.559" FontSize="17"/>
 
                 <Grid HorizontalAlignment="Left" Height="180" Margin="17,220,0,0" VerticalAlignment="Top" Width="316">
                     <Grid.Background>
@@ -171,34 +171,34 @@
                     <DataGrid ItemsSource="{Binding Path=DataView}" AutoGenerateColumns="True"/>
                 </Grid>
                 <StackPanel Orientation="Vertical"  Margin="0,400,0,0" >
-                    <Label Content="Algorytm generowania grafu" HorizontalAlignment="Center" Style="{DynamicResource Label}" Margin="6,0,25,10" FontSize="17"/>
+                    <Label Content="Graph generation algorithm" HorizontalAlignment="Left" Style="{DynamicResource Label}" Margin="65,0,0,10" FontSize="17" Width="237"/>
                     <ComboBox ItemsSource="{Binding LayoutAlgorithmTypes}"
                           SelectedItem="{Binding LayoutAlgorithmType, Mode=TwoWay}"
-                          Width="150" Height="25" Margin="90,0,103,0" />
+                          Width="150" Height="25" Margin="104,0,116,0" />
                     <StackPanel Margin="18,10,72,0" Orientation="Horizontal" HorizontalAlignment="Left" >
 
-                        <Label Style="{DynamicResource Label}" Content="Graf eulerowski:"  FontSize="15"/>
+                        <Label Style="{DynamicResource Label}" Content="Eulerian graph:"  FontSize="15"/>
 
-                        <Label  Style="{DynamicResource Label}" Foreground="Red" x:Name="IsEuler" Visibility="Hidden" Content="NIE" FontSize="15"/>
+                        <Label  Style="{DynamicResource Label}" Foreground="Red" x:Name="IsEuler" Visibility="Hidden" Content="NO" FontSize="15"/>
                     </StackPanel>
                     <StackPanel Margin="18,0,72,0" Orientation="Horizontal" HorizontalAlignment="Left" >
-                        <Label Style="{DynamicResource Label}" Content="Graf spójny:"  FontSize="15"/>
-                        <Label Style="{DynamicResource Label}" Foreground="Red" x:Name="IsConnected" Visibility="Hidden" Content="NIE" FontSize="15"/>
+                        <Label Style="{DynamicResource Label}" Content="Consistent graph:"  FontSize="15"/>
+                        <Label Style="{DynamicResource Label}" Foreground="Red" x:Name="IsConnected" Visibility="Hidden" Content="NO" FontSize="15"/>
                     </StackPanel>
                     <StackPanel Margin="18,0,72,0" Orientation="Vertical" HorizontalAlignment="Left" >
-                        <Label Style="{DynamicResource Label}" Content="Ścieżka/cykl eulera: "  FontSize="15"/>
+                        <Label Style="{DynamicResource Label}" Content="Euler Path/Cycle: "  FontSize="15"/>
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                             <TextBlock 
-         TextWrapping="Wrap" Foreground="Red" Visibility="Hidden" Text="Brak ścieżki/cyklu eulera" FontSize="15" Name="EulerPath" Height="30"/>
+         TextWrapping="Wrap" Foreground="Red" Visibility="Hidden" Text="NO EULER PATH/CYCLE" FontSize="15" x:Name="EulerPath" Height="30"/>
                         </ScrollViewer>
                     </StackPanel>
 
 
-                    <Label Content="Czas pomiędzy wyróżnieniem krawędzi cyklu" Height="39" Style="{DynamicResource Label}" FontSize="16"/>
+                    <Label Content="Time between cycle edge highlighting" Height="39" Style="{DynamicResource Label}" FontSize="16" Margin="18,0,0,0"/>
 
                     <Grid>
                         <Slider x:Name="sleeptime" Value="{Binding SleepTime}" Height="30" VerticalAlignment="Top" Width="186" Foreground="#FF811B1B" Maximum="20" Minimum="0" Margin="13,0,156,0"  IsSnapToTickEnabled="True" SmallChange="1" LargeChange="2"/>
-                        <TextBox Height="30" Text="{Binding Path=SleepTime}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="150,0,40,0" />
+                        <TextBox Height="30" Text="{Binding SleepTime}" VerticalAlignment="Top" Width="111" Style="{DynamicResource YellowTextBox}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="150,0,40,0" />
                     </Grid>
                 </StackPanel>
             </Grid>
@@ -210,11 +210,11 @@
                         <GradientStop Color="White" Offset="1"/>
                     </LinearGradientBrush>
                 </Grid.Background>
-                <Button x:Name="Generuj" Content="Generuj graf" HorizontalAlignment="Left" Height="46" Margin="10,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Generuj_Click" />
-                <Button x:Name="Napraw_graf" IsEnabled="False" Content="Napraw graf" HorizontalAlignment="Left" Height="46" Margin="179,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Napraw_Click" />
-                <Button x:Name="Euler" IsEnabled="False" Content="Wyznacz cykl Eulera" HorizontalAlignment="Left" Height="46" Margin="350,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Euler_Click"/>
-                <Button x:Name="Reset" IsEnabled="False" Content="Resetuj" HorizontalAlignment="Left" Height="46" Margin="785,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlackButton}" Click="Reset_Click" RenderTransformOrigin="0.499,-0.043" />
-                <Button x:Name="Zapisz" IsEnabled="False" Content="Zapisz do pliku" HorizontalAlignment="Left" Height="46" Margin="630,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Zapisz_Click" RenderTransformOrigin="0.499,-0.043" />
+                <Button x:Name="Generuj" Content="Generate graph" HorizontalAlignment="Left" Height="46" Margin="10,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Generuj_Click" />
+                <Button x:Name="Napraw_graf" IsEnabled="False" Content="Repair graph " HorizontalAlignment="Left" Height="46" Margin="179,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Napraw_Click" />
+                <Button x:Name="Euler" IsEnabled="False" Content="Determine the Euler cycle" HorizontalAlignment="Left" Height="46" Margin="350,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Euler_Click"/>
+                <Button x:Name="Reset" IsEnabled="False" Content="Reset" HorizontalAlignment="Left" Height="46" Margin="785,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlackButton}" Click="Reset_Click" RenderTransformOrigin="0.499,-0.043" />
+                <Button x:Name="Zapisz" IsEnabled="False" Content="Save to file" HorizontalAlignment="Left" Height="46" Margin="630,10,0,0" VerticalAlignment="Top" Width="150" Style="{DynamicResource BlueButton}" Click="Zapisz_Click" RenderTransformOrigin="0.499,-0.043" />
 
             </Grid>
 

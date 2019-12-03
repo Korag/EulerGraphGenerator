@@ -21,11 +21,11 @@ namespace euler_graph_generator.GraphMethods
             {
                 if (i == NumberOfVertices)
                 {
-                    dataTable.Columns.Add(new DataColumn("Suma"));
+                    dataTable.Columns.Add(new DataColumn("Sum"));
                 }
                 else if (i == -1)
                 {
-                    dataTable.Columns.Add(new DataColumn("Wierzchołki"));
+                    dataTable.Columns.Add(new DataColumn("Vertices"));
                 }
                 else
                 {
